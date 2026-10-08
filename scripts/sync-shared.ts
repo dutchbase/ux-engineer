@@ -58,6 +58,10 @@ export const sharedFiles = {
   "ux-plan": [
     {source: "shared/policies/writing.md", folder: "references"},
     {source: "shared/references/ai-tells.md", folder: "references"}
+  ],
+  "ux-orchestrator": [
+    {source: "shared/policies/writing.md", folder: "references"},
+    {source: "shared/references/routing.md", folder: "references"}
   ]
 } as const;
 
