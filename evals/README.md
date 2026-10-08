@@ -47,3 +47,5 @@ Then compare `findings.json` with [`ground-truth/import-app.json`](ground-truth/
 | `route-explicit-skill` | "Use ux-research only" runs `ux-research` and not `ux-audit` |
 
 The `skill-fired` graders read false when a case invokes the skill by slash command, because the command loads the skill without the Skill tool. They are unscored indicators.
+
+Must-not `tool_used` graders need `min: 0` together with `max: 0`, because `min` defaults to 1.

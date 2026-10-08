@@ -27,7 +27,8 @@ This file lists what UX Engineer does not do or cannot guarantee. It is updated 
 - It refuses a `~/.claude` that is a symlink pointing outside your home folder.
 - `doctor` does not see plugin installs. If you use the Claude Code plugin and also run the installer, you get duplicate skills and `doctor` will not say so.
 - OpenCode reads both `.claude/skills` and `.agents/skills`. Installing for more than one host can show the skills twice there.
-- The `npx github:dutchbase/ux-engineer` form was not tested before the branch merged. The tested route was `npm pack`, then `npx --package=<tarball> ux-engineer doctor`.
+- The `npx github:dutchbase/ux-engineer` form was not tested on 2026-10-08; check it after merge. The tested route was `npm pack`, then `npx --package=<tarball> ux-engineer doctor`.
+- Only a project install for all three hosts was run on real hosts; `--global`, `--force` and `--skills` are covered by unit tests only.
 - Tested on Linux (x86_64) only. Windows and macOS are untested.
 
 ## By design

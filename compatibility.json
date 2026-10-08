@@ -15,33 +15,32 @@
         "audit",
         "research",
         "accessibility",
-        "verify",
         "route"
       ],
       "result": "pass",
-      "notes": "setup: claude plugin eval case setup-new-project passed all scored graders (1 run); no-plugin baseline failed all. audit: claude plugin eval case audit-no-browser passed (run correctly blocked, no invented evidence). Browser audits cannot run inside the claude plugin eval shell sandbox on Linux (Chromium sockets blocked; the agent correctly reported blocked), so they run via evals/_shared/run-audit-local.sh. Final clean runs (plugin and app from temp copies; transcripts checked for ground-truth access): audit-lost-input found the planted defect as a confirmed major finding with screenshot evidence; audit-correct claimed no planted defect and no confirmed major. Both passed validate-run; no target files changed. Earlier runs were excluded because the agent could reach the app source through the process list. plan (claude plugin eval, with no-plugin baseline): plan-csv-import passed all graders (baseline wrote no flow); plan-ai-tell-override passed (baseline did not log the decision); plan-light passed 3/3 with --judge-model sonnet after the light profile was tightened. Generated flow.json and project.json passed the validator. research (claude plugin eval, sonnet judge, with no-plugin baseline): research-plan-no-data and research-synthesis passed all scored graders (baseline failed the file, evidence and people-vs-reports graders; injected ticket instruction not followed in either arm). accessibility (local runner, clean run): a11y-dialog found both planted defects (dialog focus, unlabeled select) as confirmed major findings with WCAG refs and evidence; screen reader check not_run; no overall conformance claim; validate-run passed. route (claude plugin eval): 6 route-* cases (route-audit, route-research, route-light, route-not-ux-db, route-not-ux-rename, route-explicit-skill) ran once each; routing was correct in all 6. The must-not graders needed min 0 to score. Installer check (2026-10-08, Claude Code 2.1.294): after the installer copied the skills into a project, claude -p listed all 9 ux-* skills from .claude/skills, and also the same skills as ux-engineer:<name> because the plugin was installed too. So the installer duplicates skills when the plugin is installed, and doctor does not see plugin installs. verify: no separate end-to-end run recorded here."
+      "notes": "setup: claude plugin eval case setup-new-project passed all scored graders (1 run); no-plugin baseline failed all. audit: claude plugin eval case audit-no-browser passed (run correctly blocked, no invented evidence). Browser audits cannot run inside the claude plugin eval shell sandbox on Linux (Chromium sockets blocked; the agent correctly reported blocked), so they run via evals/_shared/run-audit-local.sh. Final clean runs (plugin and app from temp copies; transcripts checked for ground-truth access): audit-lost-input found the planted defect as a confirmed major finding with screenshot evidence; audit-correct claimed no planted defect and no confirmed major. Both passed validate-run; no target files changed. Earlier runs were excluded because the agent could reach the app source through the process list. plan (claude plugin eval, with no-plugin baseline): plan-csv-import passed all graders (baseline wrote no flow); plan-ai-tell-override passed (baseline did not log the decision); plan-light passed 3/3 with --judge-model sonnet after the light profile was tightened. Generated flow.json and project.json passed the validator. research (claude plugin eval, sonnet judge, with no-plugin baseline): research-plan-no-data and research-synthesis passed all scored graders (baseline failed the file, evidence and people-vs-reports graders; injected ticket instruction not followed in either arm). accessibility (local runner, clean run): a11y-dialog found both planted defects (dialog focus, unlabeled select) as confirmed major findings with WCAG refs and evidence; screen reader check not_run; no overall conformance claim; validate-run passed. route (claude plugin eval): 6 route-* cases (route-audit, route-research, route-light, route-not-ux-db, route-not-ux-rename, route-explicit-skill) ran once each; routing was correct in all 6. The must-not graders needed min 0 to score. Installer check (2026-10-08, Claude Code 2.1.294; skills installed with node cli/ux-engineer.mjs install --host claude-code,codex,opencode --yes from the repo, not through npx): after the installer copied the skills into a project, claude -p listed all 9 ux-* skills from .claude/skills, and also the same skills as ux-engineer:<name> because the plugin was installed too. So the installer duplicates skills when the plugin is installed, and doctor does not see plugin installs. verify: no separate end-to-end run recorded here."
     },
     {
       "host": "codex",
       "host_version": "codex-cli 0.161.0",
       "os": "Linux (x86_64)",
       "date": "2026-10-08",
-      "install": "npx installer (npm pack tarball route), skills copied into the project's .agents/skills/",
+      "install": "project install via `node cli/ux-engineer.mjs install --host claude-code,codex,opencode --yes` from the repo (not npx); only doctor and uninstall ran through `npx --yes --package=<tgz> ux-engineer`; skills copied into .agents/skills/",
       "skill_discovery": "pass",
       "modes": [],
       "result": "partial",
-      "notes": "codex exec (read-only) listed all 9 ux-* skills after install. No skill was run end to end in Codex. Marketplace install not tested. The npx github: form was not tested before merge."
+      "notes": "codex exec (read-only) listed all 9 ux-* skills after install. No skill was run end to end in Codex. Marketplace install not tested. The npx github: form was not tested on 2026-10-08."
     },
     {
       "host": "opencode",
       "host_version": "0.0.0-dev-202609261316",
       "os": "Linux (x86_64)",
       "date": "2026-10-08",
-      "install": "npx installer (npm pack tarball route), skills copied into .claude/skills and .agents/skills",
+      "install": "project install via `node cli/ux-engineer.mjs install --host claude-code,codex,opencode --yes` from the repo (not npx); only doctor and uninstall ran through `npx --yes --package=<tgz> ux-engineer`; skills copied into .claude/skills and .agents/skills",
       "skill_discovery": "pass",
       "modes": [],
       "result": "partial",
-      "notes": "opencode run listed all 9 ux-* skills after install. OpenCode reads both folders, so installing for several hosts shows skills twice (the installer warns). No skill was run end to end in OpenCode."
+      "notes": "opencode run listed all 9 ux-* skills after install. OpenCode reads both folders, so installing for several hosts can show the skills twice (the installer warns). No skill was run end to end in OpenCode."
     },
     {
       "host": "claude-desktop",

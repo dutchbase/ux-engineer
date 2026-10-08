@@ -31,8 +31,10 @@ npx github:dutchbase/ux-engineer install --host opencode --dry-run
 npx github:dutchbase/ux-engineer install --host opencode --yes
 ```
 
+This form is untested until this release is merged; the tested form is `npx --yes --package=<tgz> ux-engineer <command>`.
+
 - `--host` takes `claude-code`, `codex` or `opencode`, comma-separated. Install is per project by default; `--global` installs into your home folder. `--skills` picks some skills only. `--force` overwrites conflicting files (a backup goes to `.ux-engineer/backup`).
-- Codex and OpenCode share `.agents/skills`, so one copy serves both. OpenCode also reads `.claude/skills`, so installing for both Claude Code and OpenCode makes OpenCode see the skills twice. The installer tells you.
+- Codex and OpenCode share `.agents/skills`, so one copy serves both. OpenCode also reads `.claude/skills`, so installing for both Claude Code and OpenCode can show the skills twice in OpenCode. The installer tells you.
 - Do not use the installer for Claude Code if you installed the plugin. You get every skill twice. `doctor` does not see plugin installs.
 - `npx github:dutchbase/ux-engineer uninstall --yes` removes what the installer wrote. `npx github:dutchbase/ux-engineer doctor` checks installed copies against the package.
 
