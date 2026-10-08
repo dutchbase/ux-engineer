@@ -105,11 +105,16 @@ needs it. Record these checks:
 
    `scrollWidth` larger than `clientWidth` means horizontal scroll.
 
-5. **Target size (SC 2.5.8).** Measure each pointer target in CSS px. Report
-   targets under 24 by 24 unless the criterion's exceptions apply.
+5. **Target size (SC 2.5.8).** Measure pointer targets in CSS px. The
+   command below lists only visible targets smaller than 24 by 24, including
+   fixed and sticky elements. Do not report a listed target until you check the
+   criterion's exceptions: an inline text link in a sentence, and a small
+   target with enough free space around it (the spacing exception). An empty
+   list means the scan found no small target of the types it covers. State in
+   the check which element types the scan covered.
 
    ```text
-   playwright-cli eval "() => [...document.querySelectorAll('a,button,input,select,textarea,[role=button]')].filter(e => e.offsetParent).map(e => { const r = e.getBoundingClientRect(); return e.tagName + '#' + e.id + ' ' + Math.round(r.width) + 'x' + Math.round(r.height) })" --raw
+   playwright-cli eval "() => [...document.querySelectorAll('a[href],button,input:not([type=hidden]),select,textarea,summary,[role=button],[role=link],[role=checkbox],[role=tab],[role=menuitem],[tabindex]:not([tabindex=\"-1\"])')].filter(e => e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden').map(e => { const r = e.getBoundingClientRect(); return {el: e.tagName.toLowerCase() + (e.id ? '#' + e.id : ''), w: Math.round(r.width), h: Math.round(r.height)} }).filter(t => t.w < 24 || t.h < 24)" --raw
    ```
 
 6. **Error identification and suggestion (SC 3.3.1, 3.3.3).** Enter invalid
@@ -126,7 +131,7 @@ needs it. Record these checks:
 
    The first command should print `"4.14.0"`. The second saves the full JSON
    result. Hash the file and record it as an `axe_result` evidence item with the
-   state in `context`.
+   state in `context.step`.
 
    - Inject again after each page load or reload. A navigation removes the script.
      A change of state inside a single-page app keeps it.
