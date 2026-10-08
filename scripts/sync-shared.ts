@@ -55,6 +55,17 @@ export const sharedFiles = {
     {source: "schemas/checks.schema.json", folder: "references"},
     {source: "dist/ux.mjs", folder: "scripts"}
   ],
+  "ux-verify": [
+    {source: "shared/policies/writing.md", folder: "references"},
+    {source: "shared/policies/evidence.md", folder: "references"},
+    {source: "shared/policies/safety.md", folder: "references"},
+    {source: "schemas/flow.schema.json", folder: "references"},
+    {source: "schemas/run.schema.json", folder: "references"},
+    {source: "schemas/evidence.schema.json", folder: "references"},
+    {source: "schemas/checks.schema.json", folder: "references"},
+    {source: "schemas/findings.schema.json", folder: "references"},
+    {source: "dist/ux.mjs", folder: "scripts"}
+  ],
   "ux-plan": [
     {source: "shared/policies/writing.md", folder: "references"},
     {source: "shared/references/ai-tells.md", folder: "references"}

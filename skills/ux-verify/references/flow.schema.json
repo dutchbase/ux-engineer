@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dutchbase/ux-engineer/schemas/flow.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "flow_id", "name", "product_id", "persona_ids", "goal", "scope", "design_system_ref", "entry_points", "prerequisites", "steps", "states", "terminal_states", "risks", "acceptance_criteria", "options_considered", "decisions", "assumptions", "open_questions"],
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "strings": {"type": "array", "items": {"type": "string"}},
+    "copy": {
+      "type": "array",
+      "items": {"type": "object", "additionalProperties": false, "required": ["key", "text"], "properties": {"key": {"type": "string"}, "text": {"type": "string"}}}
+    }
+  },
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "flow_id": {"$ref": "#/$defs/id"},
+    "name": {"type": "string"},
+    "product_id": {"$ref": "#/$defs/id"},
+    "persona_ids": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/id"}},
+    "goal": {"type": "string"},
+    "scope": {"enum": ["light", "targeted", "standard", "deep"]},
+    "design_system_ref": {"type": ["string", "null"]},
+    "entry_points": {
+      "type": "array",
+      "items": {"type": "object", "additionalProperties": false, "required": ["from", "context"], "properties": {"from": {"type": "string"}, "context": {"type": "string"}}}
+    },
+    "prerequisites": {"$ref": "#/$defs/strings"},
+    "steps": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["step_id", "title", "user_intent", "screen", "information_needed", "actions", "copy"],
+        "properties": {
+          "step_id": {"$ref": "#/$defs/id"}, "title": {"type": "string"}, "user_intent": {"type": "string"}, "screen": {"type": "string"},
+          "information_needed": {"$ref": "#/$defs/strings"},
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["action_id", "label", "kind", "leads_to"],
+              "properties": {"action_id": {"$ref": "#/$defs/id"}, "label": {"type": "string"}, "kind": {"enum": ["primary", "secondary", "destructive", "navigation"]}, "leads_to": {"$ref": "#/$defs/id"}}
+            }
+          },
+          "copy": {"$ref": "#/$defs/copy"}
+        }
+      }
+    },
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["state_id", "step_id", "kind", "trigger", "visible_feedback", "available_actions", "next", "copy"],
+        "properties": {
+          "state_id": {"$ref": "#/$defs/id"}, "step_id": {"oneOf": [{"$ref": "#/$defs/id"}, {"type": "null"}]},
+          "kind": {"enum": ["first_use", "empty", "loading", "long_running", "invalid_input", "partial_result", "unauthorized", "session_expired", "network_error", "conflict", "double_action", "back", "cancel", "resume", "recovery", "success", "other"]},
+          "trigger": {"type": "string"}, "visible_feedback": {"type": "string"},
+          "available_actions": {"$ref": "#/$defs/strings"},
+          "next": {"oneOf": [{"$ref": "#/$defs/id"}, {"type": "null"}]},
+          "copy": {"$ref": "#/$defs/copy"}
+        }
+      }
+    },
+    "terminal_states": {
+      "type": "array",
+      "items": {"type": "object", "additionalProperties": false, "required": ["state_id", "outcome", "observable_result"], "properties": {"state_id": {"$ref": "#/$defs/id"}, "outcome": {"enum": ["success", "failure", "abandoned"]}, "observable_result": {"type": "string"}}}
+    },
+    "risks": {
+      "type": "array",
+      "items": {"type": "object", "additionalProperties": false, "required": ["risk_id", "description", "mitigation"], "properties": {"risk_id": {"$ref": "#/$defs/id"}, "description": {"type": "string"}, "mitigation": {"type": "string"}}}
+    },
+    "acceptance_criteria": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["ac_id", "given", "when", "then", "verify_with", "wcag_refs"],
+        "properties": {
+          "ac_id": {"type": "string", "pattern": "^AC-[A-Z0-9-]+$"}, "given": {"type": "string"}, "when": {"type": "string"}, "then": {"type": "string"},
+          "verify_with": {"enum": ["browser", "unit", "manual", "analytics"]}, "wcag_refs": {"$ref": "#/$defs/strings"}
+        }
+      }
+    },
+    "options_considered": {
+      "type": "array",
+      "items": {"type": "object", "additionalProperties": false, "required": ["option", "tradeoffs", "chosen"], "properties": {"option": {"type": "string"}, "tradeoffs": {"type": "string"}, "chosen": {"type": "boolean"}}}
+    },
+    "decisions": {
+      "type": "array",
+      "items": {"type": "object", "additionalProperties": false, "required": ["decision_id", "date", "decision", "reason", "source"], "properties": {"decision_id": {"$ref": "#/$defs/id"}, "date": {"type": "string", "format": "date"}, "decision": {"type": "string"}, "reason": {"type": "string"}, "source": {"type": "string"}}}
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {"type": "object", "additionalProperties": false, "required": ["text", "validation"], "properties": {"text": {"type": "string"}, "validation": {"type": "string"}}}
+    },
+    "open_questions": {"$ref": "#/$defs/strings"}
+  }
+}
