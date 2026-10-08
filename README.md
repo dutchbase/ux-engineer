@@ -3,7 +3,7 @@
 A plugin for Claude Code, Codex, OpenCode and Claude desktop that makes coding agents design for real people before they build a UI.
 
 > [!IMPORTANT]
-> Early development. Five commands work but are experimental: `ux-setup`, `ux-plan`, `ux-audit`, `ux-research` and `ux-accessibility`. Everything else in this README is planned. The full design is in [`docs/design.md`](docs/design.md), and known gaps are in [`docs/limitations.md`](docs/limitations.md).
+> Early development. Six skills work but are experimental: `ux-setup`, `ux-plan`, `ux-audit`, `ux-research`, `ux-accessibility` and `ux-verify`. The router `ux-orchestrator` is also experimental. Everything else in this README is planned. The full design is in [`docs/design.md`](docs/design.md), and known gaps are in [`docs/limitations.md`](docs/limitations.md).
 
 ## Install
 
@@ -23,6 +23,18 @@ codex plugin marketplace add dutchbase/ux-engineer
 ```
 
 Then install UX Engineer from the `/plugins` list.
+
+OpenCode, or committing the skills into your project: use the installer. It copies the skill folders. Run it with `--dry-run` first to see what it would do, then with `--yes` to apply.
+
+```bash
+npx github:dutchbase/ux-engineer install --host opencode --dry-run
+npx github:dutchbase/ux-engineer install --host opencode --yes
+```
+
+- `--host` takes `claude-code`, `codex` or `opencode`, comma-separated. Install is per project by default; `--global` installs into your home folder. `--skills` picks some skills only. `--force` overwrites conflicting files (a backup goes to `.ux-engineer/backup`).
+- Codex and OpenCode share `.agents/skills`, so one copy serves both. OpenCode also reads `.claude/skills`, so installing for both Claude Code and OpenCode makes OpenCode see the skills twice. The installer tells you.
+- Do not use the installer for Claude Code if you installed the plugin. You get every skill twice. `doctor` does not see plugin installs.
+- `npx github:dutchbase/ux-engineer uninstall --yes` removes what the installer wrote. `npx github:dutchbase/ux-engineer doctor` checks installed copies against the package.
 
 Then, in your project:
 
@@ -44,12 +56,13 @@ UX Engineer is a small set of agent skills. It never writes application code. It
 
 | Skill | What it does |
 |---|---|
-| `ux-orchestrator` | Works out what kind of request this is and how much process it deserves. A two-pixel change gets a quick check, not an audit. |
+| `ux-orchestrator` (experimental) | Works out what kind of request this is and how much process it deserves. A two-pixel change gets a quick check, not an audit. |
 | `ux-framing` | Interviews you about your users and builds personas, task goals and success criteria. Guesses are labeled as guesses. |
 | `ux-research` (experimental) | Looks up best practices and competitor patterns on the web, summarizes real user data if you have any, and plans research if you don't. |
 | `ux-flow-design` | Designs flows with all the states that usually get forgotten: empty, loading, errors, expired sessions, double clicks, going back. Includes UX copy. |
 | `ux-audit` | Opens your app in a real browser, walks through tasks at phone, tablet, laptop and wide-screen sizes, and reports problems with evidence. |
 | `ux-accessibility` (experimental) | Builds WCAG 2.2 AA requirements into designs and checks them, without pretending an automated scan proves compliance. |
+| `ux-verify` (experimental) | Checks a finished change against the acceptance criteria and reports only what the evidence supports. |
 
 Everything the plugin learns about your product (personas, key flows, tone of voice, target screen sizes, decisions) is stored in your project repository under `docs/ux/`, so every agent and every teammate works from the same picture.
 
@@ -70,7 +83,7 @@ Everything the plugin learns about your product (personas, key flows, tone of vo
 | Claude Code | Plugin marketplace |
 | Claude desktop / claude.ai (Cowork) | Plugin marketplace |
 | Codex | Plugin marketplace |
-| OpenCode | `npx` installer or copying the skills folder |
+| OpenCode | `npx github:dutchbase/ux-engineer install` or copying the skills folder |
 
 One repository, one copy of each skill, thin adapters per host. Details are in [design §8](docs/design.md#8-hosts-and-installation).
 
@@ -90,7 +103,7 @@ One repository, one copy of each skill, thin adapters per host. Details are in [
     findings with evidence, report in Markdown and HTML
 ```
 
-All five commands exist today, as experimental versions.
+These commands exist today, as experimental versions.
 
 ## Roadmap
 

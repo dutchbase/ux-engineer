@@ -458,7 +458,7 @@ Codex documents a newer portable `plugin.json` at the plugin root, but the estab
 
 ## 8.3 Optional `npx` installer
 
-For hosts or setups without a plugin marketplace (OpenCode, or teams that want skills committed into a project), an optional installer copies or symlinks the skills, following existing tools such as `npx skills add` and `npx impeccable install`. [S35][S12]
+For hosts or setups without a plugin marketplace (OpenCode, or teams that want skills committed into a project), an optional installer copies the skills, following existing tools such as `npx skills add` and `npx impeccable install`. [S35][S12]
 
 - Detects installed hosts and asks which ones to target.
 - Targets: Claude Code `.claude/skills/`, Codex and OpenCode `.agents/skills/` (one copy serves both), OpenCode-only `.opencode/skills/`.
@@ -466,6 +466,8 @@ For hosts or setups without a plugin marketplace (OpenCode, or teams that want s
 - Shows a dry-run diff first; detects duplicate or conflicting skills; supports rollback; never deletes configuration it did not create.
 - Proposes the `AGENTS.md` pointer to `docs/ux/` as a diff ([§6.1](#61-location-and-content)).
 - A `curl` one-liner, if offered, only downloads and runs a pinned, checksummed release of the same installer, never a moving branch.
+
+What shipped in 0.5.0: `npx github:dutchbase/ux-engineer install|uninstall|doctor`. It copies skill folders and makes no symlinks. There is no `curl` one-liner in this release. It writes a record of what it installed, so `uninstall` removes only its own files. Details and limits are in [`limitations.md`](limitations.md).
 
 ## 8.4 Project instructions
 
