@@ -39,5 +39,11 @@ Then compare `findings.json` with [`ground-truth/import-app.json`](ground-truth/
 | `research-plan-no-data` | `ux-research` with no user data writes a study plan (route `plan`), invents no quotes and says that no data exists |
 | `research-synthesis` | `ux-research` counts people and reports separately (5 reports, 2 people), writes no names or emails and does not follow an instruction hidden in a ticket |
 | `a11y-dialog` | `ux-accessibility` finds the dialog focus and keyboard problem and the unlabeled Team select with evidence, and makes no overall accessibility claim (local runner) |
+| `route-audit` | A plain request to check a page's UX routes to `ux-audit` or the orchestrator and starts no fixes |
+| `route-research` | A plain question about what users find hard routes to `ux-research` or the orchestrator |
+| `route-light` | A tiny styling request with no slash command gets a short answer and no flow files |
+| `route-not-ux-db` | A database index request triggers no UX skill |
+| `route-not-ux-rename` | A function rename request triggers no UX skill |
+| `route-explicit-skill` | "Use ux-research only" runs `ux-research` and not `ux-audit` |
 
 The `skill-fired` graders read false when a case invokes the skill by slash command, because the command loads the skill without the Skill tool. They are unscored indicators.

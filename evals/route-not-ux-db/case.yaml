@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: route-not-ux-db
+tags: [route]
+plugins: ["../.."]
+context:
+  scaffold_script: fixture.sh
