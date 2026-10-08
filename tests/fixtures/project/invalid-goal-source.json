@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "product_id": "crumb-cart",
+  "product_name": "Crumb Cart",
+  "product_locale": "en-GB",
+  "updated_at": "2026-10-08T09:30:00Z",
+  "personas": [{
+    "persona_id": "shop-owner",
+    "label": "Shop owner",
+    "proto": true,
+    "summary": "A shop owner.",
+    "goals": ["Accept orders"],
+    "context": "At the shop.",
+    "knowledge": "Unknown.",
+    "devices": [],
+    "frustrations": [],
+    "sources": [
+      {"attribute": "summary", "kind": "assumed", "ref": null, "validation": "Ask a shop owner."},
+      {"attribute": "context", "kind": "assumed", "ref": null, "validation": "Observe the shop."},
+      {"attribute": "knowledge", "kind": "assumed", "ref": null, "validation": "Ask about tools."}
+    ]
+  }],
+  "jobs": [],
+  "flows": [],
+  "tone": {"voice": "Clear", "use": [], "avoid": [], "notes": null},
+  "accessibility": {"target": "WCAG 2.2 AA", "notes": null},
+  "viewports": [{"name": "phone", "width": 390, "height": 844}],
+  "design_system": {"kind": "none", "path": null, "notes": null},
+  "decisions": [],
+  "open_questions": []
+}

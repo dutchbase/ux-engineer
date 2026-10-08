@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dutchbase/ux-engineer/schemas/project.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "product_id",
+    "product_name",
+    "product_locale",
+    "updated_at",
+    "personas",
+    "jobs",
+    "flows",
+    "tone",
+    "accessibility",
+    "viewports",
+    "design_system",
+    "decisions",
+    "open_questions"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "product_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "product_name": {"type": "string"},
+    "product_locale": {"type": "string", "pattern": "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "personas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["persona_id", "label", "proto", "summary", "goals", "context", "knowledge", "devices", "frustrations", "sources"],
+        "properties": {
+          "persona_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+          "label": {"type": "string"},
+          "proto": {"type": "boolean"},
+          "summary": {"type": "string"},
+          "goals": {"type": "array", "items": {"type": "string"}},
+          "context": {"type": "string"},
+          "knowledge": {"type": "string"},
+          "devices": {"type": "array", "items": {"type": "string"}},
+          "frustrations": {"type": "array", "items": {"type": "string"}},
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["attribute", "kind", "ref", "validation"],
+              "properties": {
+                "attribute": {"enum": ["summary", "goals", "context", "knowledge", "devices", "frustrations"]},
+                "kind": {"enum": ["interview", "web_research", "user_data", "assumed"]},
+                "ref": {"type": ["string", "null"]},
+                "validation": {"type": ["string", "null"]}
+              }
+            }
+          }
+        }
+      }
+    },
+    "jobs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["job_id", "persona_ids", "statement", "success_outcome"],
+        "properties": {
+          "job_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+          "persona_ids": {"type": "array", "items": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}},
+          "statement": {"type": "string"},
+          "success_outcome": {"type": "string"}
+        }
+      }
+    },
+    "flows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["flow_id", "name", "persona_ids", "file"],
+        "properties": {
+          "flow_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+          "name": {"type": "string"},
+          "persona_ids": {"type": "array", "items": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}},
+          "file": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "tone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["voice", "use", "avoid", "notes"],
+      "properties": {
+        "voice": {"type": "string"},
+        "use": {"type": "array", "items": {"type": "string"}},
+        "avoid": {"type": "array", "items": {"type": "string"}},
+        "notes": {"type": ["string", "null"]}
+      }
+    },
+    "accessibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target", "notes"],
+      "properties": {
+        "target": {"enum": ["WCAG 2.2 A", "WCAG 2.2 AA", "WCAG 2.2 AAA"]},
+        "notes": {"type": ["string", "null"]}
+      }
+    },
+    "viewports": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "width", "height"],
+        "properties": {
+          "name": {"type": "string"},
+          "width": {"type": "integer", "exclusiveMinimum": 0},
+          "height": {"type": "integer", "exclusiveMinimum": 0}
+        }
+      }
+    },
+    "design_system": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "notes"],
+      "properties": {
+        "kind": {"enum": ["design_md", "tokens", "component_library", "none"]},
+        "path": {"type": ["string", "null"]},
+        "notes": {"type": ["string", "null"]}
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["decision_id", "date", "decision", "reason", "source", "decided_by", "kind"],
+        "properties": {
+          "decision_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+          "date": {"type": "string", "format": "date"},
+          "decision": {"type": "string"},
+          "reason": {"type": "string"},
+          "source": {"type": "string"},
+          "decided_by": {"enum": ["user", "agent"]},
+          "kind": {"enum": ["general", "ai_tell_override"]}
+        }
+      }
+    },
+    "open_questions": {"type": "array", "items": {"type": "string"}}
+  }
+}

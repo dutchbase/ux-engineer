@@ -1,0 +1,250 @@
+{
+  "title": "UX project setup interview",
+  "intro": "Answer what you know. Add a note when an option does not fit. The agent will keep unknowns as open questions.",
+  "settings": {
+    "pageSize": 4,
+    "submitLabel": "Save answer",
+    "finishLabel": "Finish"
+  },
+  "categories": [
+    {
+      "title": "Product",
+      "intro": "Define the product and its language.",
+      "questions": [
+        {
+          "id": "product_name",
+          "type": "text",
+          "label": "What is the product name?",
+          "explanation": "This name appears in the project UX file and its generated README.",
+          "required": true
+        },
+        {
+          "id": "product_summary",
+          "type": "textarea",
+          "label": "What does the product help people do?",
+          "explanation": "Describe the main user outcome in one or two sentences. Do not describe only the technology.",
+          "required": true
+        },
+        {
+          "id": "product_locale",
+          "type": "text",
+          "label": "What product locale should guide interface copy?",
+          "explanation": "Use a locale such as en-GB or nl-NL. This controls product labels, not the report language.",
+          "required": true,
+          "placeholder": "en-GB"
+        }
+      ]
+    },
+    {
+      "title": "Customers",
+      "intro": "Describe the people, situations, and problems that shape the experience.",
+      "questions": [
+        {
+          "id": "customer_roles",
+          "type": "textarea",
+          "label": "Which customer roles use or receive this product?",
+          "explanation": "Give role labels, such as first-time shop owner or account administrator. Avoid unsupported names or demographic details.",
+          "required": true
+        },
+        {
+          "id": "customer_type_count",
+          "type": "number",
+          "label": "How many important customer types should we model first?",
+          "explanation": "A small number keeps the first project file useful. Add a note if roles overlap.",
+          "min": 1,
+          "max": 10,
+          "step": 1
+        },
+        {
+          "id": "customer_goals",
+          "type": "textarea",
+          "label": "What are these customers trying to achieve?",
+          "explanation": "Describe the job and the desired outcome. Separate the outcome from the feature they requested.",
+          "required": true
+        },
+        {
+          "id": "customer_context",
+          "type": "textarea",
+          "label": "When and where do they use the product?",
+          "explanation": "Include the trigger, setting, time pressure, interruptions, and information available at that moment.",
+          "required": true
+        },
+        {
+          "id": "customer_knowledge",
+          "type": "single",
+          "label": "How much product or domain knowledge do they usually have?",
+          "explanation": "This guides labels, explanations, defaults, and recovery help.",
+          "options": [
+            { "value": "new", "label": "New to the task" },
+            { "value": "mixed", "label": "Mixed levels" },
+            { "value": "experienced", "label": "Experienced" },
+            { "value": "unknown", "label": "Not known yet" }
+          ]
+        },
+        {
+          "id": "customer_devices",
+          "type": "multi",
+          "label": "Which devices do customers use?",
+          "explanation": "Select known devices. Add a note about shared devices, poor connections, or unusual input methods.",
+          "options": [
+            { "value": "phone", "label": "Phone" },
+            { "value": "tablet", "label": "Tablet" },
+            { "value": "laptop", "label": "Laptop" },
+            { "value": "desktop", "label": "Desktop" },
+            { "value": "other", "label": "Other" }
+          ],
+          "allowOther": true
+        },
+        {
+          "id": "customer_frustrations",
+          "type": "textarea",
+          "label": "What frustrates customers during the task?",
+          "explanation": "List observed problems or clearly mark guesses. Do not present an agent assumption as user evidence.",
+          "required": true
+        },
+        {
+          "id": "customer_exit_reasons",
+          "type": "textarea",
+          "label": "What might make them stop, leave, or ask for help?",
+          "explanation": "Include confusing steps, missing information, cost, trust concerns, and recovery failures when known.",
+          "required": true
+        }
+      ]
+    },
+    {
+      "title": "Evidence",
+      "intro": "Separate real product evidence from assumptions. Add a note when evidence covers only one segment.",
+      "questions": [
+        {
+          "id": "evidence_available",
+          "type": "multi",
+          "label": "What real user or product evidence is available?",
+          "explanation": "Choose every source that exists. Public web material is not evidence about this product's users.",
+          "options": [
+            { "value": "interviews", "label": "User interviews" },
+            { "value": "support_tickets", "label": "Support tickets" },
+            { "value": "analytics", "label": "Product analytics" },
+            { "value": "usability_tests", "label": "Usability tests" },
+            { "value": "surveys", "label": "Surveys" },
+            { "value": "user_data", "label": "Other supplied user data" },
+            { "value": "none", "label": "None yet" }
+          ],
+          "allowOther": true,
+          "required": true
+        },
+        {
+          "id": "evidence_location",
+          "type": "textarea",
+          "label": "Where can the agent find the available evidence?",
+          "explanation": "Give safe file paths, source IDs, or a short description. Do not paste secrets or personal data.",
+          "showIf": { "question": "evidence_available", "answered": true }
+        },
+        {
+          "id": "interview_evidence_scope",
+          "type": "textarea",
+          "label": "What groups and questions do the interviews cover?",
+          "explanation": "This prevents a small interview sample from being treated as evidence about every customer.",
+          "showIf": { "question": "evidence_available", "contains": "interviews" }
+        },
+        {
+          "id": "analytics_evidence_scope",
+          "type": "textarea",
+          "label": "What events, period, and segments do the analytics cover?",
+          "explanation": "A metric needs a definition, time period, and segment before it can support a user claim.",
+          "showIf": { "question": "evidence_available", "contains": "analytics" }
+        }
+      ]
+    },
+    {
+      "title": "Tone",
+      "intro": "Set the voice for product copy.",
+      "questions": [
+        {
+          "id": "tone_voice",
+          "type": "textarea",
+          "label": "How should the product sound?",
+          "explanation": "Describe the voice with practical words, such as calm, direct, or encouraging.",
+          "required": true
+        },
+        {
+          "id": "tone_words",
+          "type": "textarea",
+          "label": "Which words should the product use or avoid?",
+          "explanation": "List preferred terms, banned terms, and domain terms that need plain-language explanations.",
+          "required": true
+        }
+      ]
+    },
+    {
+      "title": "Accessibility",
+      "questions": [
+        {
+          "id": "accessibility_target",
+          "type": "single",
+          "label": "Which accessibility target should guide the work?",
+          "explanation": "WCAG 2.2 AA is the default. Choose another target only when the project requires it.",
+          "options": [
+            { "value": "WCAG 2.2 A", "label": "WCAG 2.2 A" },
+            { "value": "WCAG 2.2 AA", "label": "WCAG 2.2 AA" },
+            { "value": "WCAG 2.2 AAA", "label": "WCAG 2.2 AAA" }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Screen sizes",
+      "questions": [
+        {
+          "id": "screen_sizes",
+          "type": "multi",
+          "label": "Which screen sizes must the team check?",
+          "explanation": "The default checks are phone 390×844, tablet 820×1180, laptop 1440×900, and wide 1920×1080. Add a note for more sizes.",
+          "options": [
+            { "value": "phone", "label": "Phone: 390×844" },
+            { "value": "tablet", "label": "Tablet: 820×1180" },
+            { "value": "laptop", "label": "Laptop: 1440×900" },
+            { "value": "wide", "label": "Wide: 1920×1080" },
+            { "value": "other", "label": "Other" }
+          ],
+          "allowOther": true
+        }
+      ]
+    },
+    {
+      "title": "Design system",
+      "questions": [
+        {
+          "id": "design_system",
+          "type": "single",
+          "label": "What design system source should the agent use?",
+          "explanation": "Choose the source that exists in the project. The agent reads it and does not create or rewrite it.",
+          "options": [
+            { "value": "design_md", "label": "DESIGN.md" },
+            { "value": "tokens", "label": "Token files" },
+            { "value": "component_library", "label": "Component library" },
+            { "value": "none", "label": "None yet" }
+          ]
+        },
+        {
+          "id": "design_system_path",
+          "type": "text",
+          "label": "What is the design system path?",
+          "explanation": "Give a repository-relative path. Leave this empty when no design system exists.",
+          "showIf": { "question": "design_system", "not": "none" }
+        }
+      ]
+    },
+    {
+      "title": "Key flows",
+      "questions": [
+        {
+          "id": "key_flows",
+          "type": "textarea",
+          "label": "What are the three most important customer tasks?",
+          "explanation": "Name each task and its observable success outcome. Record fewer tasks when the product is small.",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

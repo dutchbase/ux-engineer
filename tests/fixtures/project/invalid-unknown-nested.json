@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "product_id": "crumb-cart",
+  "product_name": "Crumb Cart",
+  "product_locale": "en-GB",
+  "updated_at": "2026-10-08T09:30:00Z",
+  "personas": [],
+  "jobs": [],
+  "flows": [],
+  "tone": {"voice": "Clear", "use": [], "avoid": [], "notes": null},
+  "accessibility": {"target": "WCAG 2.2 AA", "notes": null},
+  "viewports": [{"name": "phone", "width": 390, "height": 844, "extra": true}],
+  "design_system": {"kind": "none", "path": null, "notes": null},
+  "decisions": [],
+  "open_questions": []
+}

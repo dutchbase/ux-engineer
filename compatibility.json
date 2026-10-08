@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "plugin_version": "0.1.0",
+  "results": [
+    {
+      "host": "claude-code",
+      "host_version": "2.1.292 (Claude Code)",
+      "os": "Linux (x86_64)",
+      "date": "2026-10-08",
+      "install": "--plugin-dir (local), manifest checked with claude plugin validate",
+      "skill_discovery": "pass",
+      "modes": ["setup"],
+      "result": "pass",
+      "notes": "claude plugin eval case setup-new-project: all scored graders passed (1 run); no-plugin baseline failed all graders. Generated project.json passed the repo validator."
+    },
+    {
+      "host": "codex",
+      "host_version": "codex-cli 0.160.1",
+      "os": "Linux (x86_64)",
+      "date": "2026-10-08",
+      "install": "skills symlinked into a project's .agents/skills/",
+      "skill_discovery": "pass",
+      "modes": [],
+      "result": "partial",
+      "notes": "Both skills discovered. ux-setup not yet run end to end in Codex. Marketplace install not yet tested."
+    },
+    { "host": "opencode", "result": "not_tested" },
+    { "host": "claude-desktop", "result": "not_tested" }
+  ]
+}

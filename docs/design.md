@@ -447,14 +447,14 @@ One repository serves every host, as projects such as Superpowers and Impeccable
 ux-engineer/
   .claude-plugin/plugin.json        # Claude Code, Claude desktop, Cowork
   .claude-plugin/marketplace.json   # plugin source "./"; Codex reads it as legacy fallback
-  plugin.json                       # portable Agent Plugins manifest for Codex
+  .codex-plugin/plugin.json         # Codex manifest (the format Superpowers and OpenAI's own plugins use)
   .agents/plugins/marketplace.json  # native Codex marketplace
   skills/<name>/SKILL.md            # the ONE shared copy, spec-only frontmatter
     references/  scripts/  assets/
   (no top-level bin/)
 ```
 
-To verify in WP12: that the shared marketplace file does not conflict between hosts, and that Claude Code ignores the root `plugin.json`.
+Codex documents a newer portable `plugin.json` at the plugin root, but the established multi-host plugins still ship `.codex-plugin/plugin.json`. We follow the proven layout and revisit when the portable format is widely used. To verify in WP12: that the shared marketplace file does not conflict between hosts.
 
 ## 8.3 Optional `npx` installer
 
@@ -707,7 +707,9 @@ ux-engineer/
 
 ## WP03. Contracts, validator and status logic
 
-**Depends on:** WP01. **Files:** `schemas/*.schema.json`, `src/contracts/validate.ts`, `src/contracts/verdict.ts`, `tests/contracts/`.
+**Depends on:** WP01. **Files:** `schemas/project.schema.json`, `schemas/checks.schema.json`, `src/contracts/validate.ts`, `src/contracts/verdict.ts`, `tests/contracts/`.
+
+The other schemas (product brief, research, flow, run, evidence, findings) are added in the work packages that first use them (WP06–WP09).
 
 **Interfaces:** `validateArtifact(kind, input)` returns only validated data or structured errors; `deriveRunStatus(checks, capabilities)` returns exactly one of the four run statuses.
 

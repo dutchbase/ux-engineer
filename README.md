@@ -3,7 +3,28 @@
 A plugin for Claude Code, Codex, OpenCode and Claude desktop that makes coding agents design for real people before they build a UI.
 
 > [!IMPORTANT]
-> This project is in the design phase. There is nothing to install yet. The full design is in [`docs/design.md`](docs/design.md). Star or watch the repo to follow progress, and open an issue if you see a problem with the plan.
+> Early development. The first command, `ux-setup`, works but is experimental. Everything else in this README is planned. The full design is in [`docs/design.md`](docs/design.md), and known gaps are in [`docs/limitations.md`](docs/limitations.md).
+
+## Install
+
+Claude Code:
+
+```text
+/plugin marketplace add dutchbase/ux-engineer
+/plugin install ux-engineer@ux-engineer
+```
+
+Claude desktop or claude.ai: open Customize, then Plugins, then Add marketplace, and enter `dutchbase/ux-engineer`. (Not tested yet.)
+
+Codex:
+
+```text
+codex plugin marketplace add dutchbase/ux-engineer
+```
+
+Then install UX Engineer from the `/plugins` list.
+
+Then run `/ux-engineer:ux-setup` (Claude) or `$ux-setup` (Codex) in your project. It interviews you about your users and writes `docs/ux/project.json`. For a long interview, install [Brainstormform](https://github.com/dutchbase/Brainstormform) first; without it, the plugin asks its questions in the chat.
 
 ## Why
 
@@ -38,7 +59,7 @@ Everything the plugin learns about your product (personas, key flows, tone of vo
 
 ## Planned hosts
 
-| Host | Install route (planned) |
+| Host | Install route |
 |---|---|
 | Claude Code | Plugin marketplace |
 | Claude desktop / claude.ai (Cowork) | Plugin marketplace |
@@ -63,7 +84,7 @@ One repository, one copy of each skill, thin adapters per host. Details are in [
     findings with evidence, report in Markdown and HTML
 ```
 
-These commands do not exist yet. They show the intended shape.
+Only `ux-setup` exists today. The other commands show the intended shape.
 
 ## Roadmap
 

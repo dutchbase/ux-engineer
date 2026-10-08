@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "product_id": "crumb-cart",
+  "product_name": "Crumb Cart",
+  "product_locale": "en-GB",
+  "updated_at": "2026-10-08T09:30:00Z",
+  "personas": [
+    {
+      "persona_id": "first-time-shop-owner",
+      "label": "First-time shop owner",
+      "proto": false,
+      "summary": "A bakery owner who wants to take local orders online.",
+      "goals": ["Accept pre-orders before the morning rush"],
+      "context": "Uses the app from a bakery counter between customer orders.",
+      "knowledge": "Comfortable with messaging apps but new to online ordering tools.",
+      "devices": ["phone", "laptop"],
+      "frustrations": ["Manual order notes are easy to lose"],
+      "sources": [
+        {"attribute": "summary", "kind": "interview", "ref": "interview-01", "validation": null},
+        {"attribute": "goals", "kind": "interview", "ref": "interview-01", "validation": null},
+        {"attribute": "context", "kind": "interview", "ref": "interview-01", "validation": null},
+        {"attribute": "knowledge", "kind": "interview", "ref": "interview-01", "validation": null},
+        {"attribute": "devices", "kind": "user_data", "ref": "analytics-01", "validation": null},
+        {"attribute": "frustrations", "kind": "interview", "ref": "interview-01", "validation": null}
+      ]
+    }
+  ],
+  "jobs": [
+    {
+      "job_id": "take-preorder",
+      "persona_ids": ["first-time-shop-owner"],
+      "statement": "When the shop is busy, accept a customer pre-order quickly.",
+      "success_outcome": "The order is confirmed with a pickup time."
+    }
+  ],
+  "flows": [
+    {
+      "flow_id": "bakery-preorder",
+      "name": "Bakery pre-order",
+      "persona_ids": ["first-time-shop-owner"],
+      "file": "docs/ux/flows/bakery-preorder.md"
+    }
+  ],
+  "tone": {
+    "voice": "Warm and direct",
+    "use": ["Plain action labels"],
+    "avoid": ["Jargon"],
+    "notes": "Keep order states easy to scan."
+  },
+  "accessibility": {
+    "target": "WCAG 2.2 AA",
+    "notes": "Keyboard and touch use are in scope."
+  },
+  "viewports": [
+    {"name": "phone", "width": 390, "height": 844},
+    {"name": "laptop", "width": 1440, "height": 900}
+  ],
+  "design_system": {
+    "kind": "tokens",
+    "path": "src/styles/tokens.css",
+    "notes": "Use the existing bakery brand tokens."
+  },
+  "decisions": [
+    {
+      "decision_id": "orders-before-catalog",
+      "date": "2026-10-08",
+      "decision": "Show open orders before the product catalog.",
+      "reason": "The owner checks active pickups first.",
+      "source": "interview-01",
+      "decided_by": "user",
+      "kind": "general"
+    }
+  ],
+  "open_questions": ["Should customers be able to change a pickup time?"]
+}

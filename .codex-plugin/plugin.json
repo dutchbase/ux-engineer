@@ -1,0 +1,21 @@
+{
+  "name": "ux-engineer",
+  "version": "0.1.0",
+  "description": "Makes coding agents design for real users: personas first, evidence before claims, no generic AI UI.",
+  "author": { "name": "dutchbase", "url": "https://github.com/dutchbase" },
+  "homepage": "https://github.com/dutchbase/ux-engineer",
+  "repository": "https://github.com/dutchbase/ux-engineer",
+  "license": "MIT",
+  "keywords": ["ux", "ux-design", "personas", "accessibility", "user-research"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "UX Engineer",
+    "shortDescription": "Personas, flows and UX checks for coding agents",
+    "longDescription": "UX Engineer interviews you about your users, stores personas and UX rules in your repository, and gives your coding agent the input it needs to build for real people. It never writes application code.",
+    "developerName": "dutchbase",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": ["Set up UX for this project.", "Who are the users of this product?"],
+    "websiteURL": "https://github.com/dutchbase/ux-engineer"
+  }
+}

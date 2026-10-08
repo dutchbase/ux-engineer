@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "run_id": "run-001",
+  "checks": [
+    {"check_id": "keyboard", "required": true, "result": "not_applicable", "evidence_ids": []}
+  ]
+}

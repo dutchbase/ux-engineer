@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "pinned_at": "2026-10-08",
+  "sources": [
+    {
+      "source_id": "S09",
+      "repository": "https://github.com/anthropics/knowledge-work-plugins",
+      "branch_consulted": "main",
+      "commit": "ae1513ea94dcb74a7f1505ddcf3b0ec3fab327f1",
+      "paths_consulted": [
+        "design/"
+      ],
+      "license_spdx": "Apache-2.0",
+      "allowed_reuse": "adapt-with-notice-and-changes-stated",
+      "review_status": "inspiration-only",
+      "copied_files": []
+    },
+    {
+      "source_id": "S10",
+      "repository": "https://github.com/openai/plugins",
+      "branch_consulted": "main",
+      "commit": "0722921d5542fc593105c27bd52630babd8b8c2a",
+      "paths_consulted": [
+        "plugins/product-design/"
+      ],
+      "license_spdx": "none",
+      "allowed_reuse": "reference-only",
+      "review_status": "inspiration-only",
+      "copied_files": []
+    },
+    {
+      "source_id": "S11",
+      "repository": "https://github.com/rampstackco/claude-skills",
+      "branch_consulted": "main",
+      "commit": "482c9bf74697fc1e311bd4dca5ce301f046c4b76",
+      "paths_consulted": [
+        "skills/ux-research/",
+        "skills/information-architecture/"
+      ],
+      "license_spdx": "MIT",
+      "allowed_reuse": "adapt-with-notice",
+      "review_status": "inspiration-only",
+      "copied_files": []
+    },
+    {
+      "source_id": "S12",
+      "repository": "https://github.com/pbakaus/impeccable",
+      "branch_consulted": "main",
+      "commit": "778c8a7b71ccd5bfe3ca6ac68c15d9d872d0f87d",
+      "paths_consulted": [
+        "."
+      ],
+      "license_spdx": "Apache-2.0",
+      "allowed_reuse": "adapt-with-notice-and-changes-stated",
+      "review_status": "inspiration-only",
+      "copied_files": []
+    },
+    {
+      "source_id": "S13",
+      "repository": "https://github.com/EliaAlberti/ux-audit-skill",
+      "branch_consulted": "main",
+      "commit": "76eb1ab73560c90275823395fda52c3ca4ea8b2b",
+      "paths_consulted": [
+        "."
+      ],
+      "license_spdx": "MIT",
+      "allowed_reuse": "adapt-with-notice",
+      "review_status": "inspiration-only",
+      "copied_files": []
+    },
+    {
+      "source_id": "S14",
+      "repository": "https://github.com/jezweb/claude-skills",
+      "branch_consulted": "main",
+      "commit": "64965d9d9fc76ad2caeea2e27dd8d679ec7521b3",
+      "paths_consulted": [
+        "plugins/dev-tools/skills/ux-audit/"
+      ],
+      "license_spdx": "MIT",
+      "allowed_reuse": "adapt-with-notice",
+      "review_status": "inspiration-only",
+      "copied_files": []
+    },
+    {
+      "source_id": "S15",
+      "repository": "https://github.com/lobehub/lobehub",
+      "branch_consulted": "canary",
+      "commit": "d05af54aed7c85691fee5e01f714cf5035249729",
+      "paths_consulted": [
+        ".agents/skills/product-design/"
+      ],
+      "license_spdx": "NOASSERTION",
+      "allowed_reuse": "reference-only",
+      "review_status": "inspiration-only",
+      "copied_files": []
+    },
+    {
+      "source_id": "S16",
+      "repository": "https://github.com/mahirautela2020-design/claude-skills-ux",
+      "branch_consulted": "main",
+      "commit": "fae2f0be141b4df010c10c7395a32c8fc1773782",
+      "paths_consulted": [
+        "."
+      ],
+      "license_spdx": "MIT",
+      "allowed_reuse": "adapt-with-notice",
+      "review_status": "inspiration-only",
+      "copied_files": []
+    },
+    {
+      "source_id": "S17",
+      "repository": "https://github.com/mae616/design-skills",
+      "branch_consulted": "main",
+      "commit": "79e3398bee27664de70c7b97a30dd928f6fe7976",
+      "paths_consulted": [
+        "."
+      ],
+      "license_spdx": "MIT",
+      "allowed_reuse": "adapt-with-notice",
+      "review_status": "inspiration-only",
+      "copied_files": []
+    },
+    {
+      "source_id": "S18",
+      "repository": "https://github.com/ratingtesting/agent-roles",
+      "branch_consulted": "master",
+      "commit": "6fb9e6f363849966262ae76628806fc949b782f4",
+      "paths_consulted": [
+        "ux-researcher/"
+      ],
+      "license_spdx": "none",
+      "allowed_reuse": "reference-only",
+      "review_status": "inspiration-only",
+      "copied_files": []
+    },
+    {
+      "source_id": "S34",
+      "repository": "https://github.com/obra/superpowers",
+      "branch_consulted": "main",
+      "commit": "8ca22dba9a94f28898bbce59f2537ff4d87c747d",
+      "paths_consulted": [
+        "."
+      ],
+      "license_spdx": "MIT",
+      "allowed_reuse": "adapt-with-notice",
+      "review_status": "inspiration-only",
+      "copied_files": []
+    },
+    {
+      "source_id": "S35",
+      "repository": "https://github.com/vercel-labs/skills",
+      "branch_consulted": "main",
+      "commit": "87a266971d9460a3d2606075b8e91edc83325472",
+      "paths_consulted": [
+        "."
+      ],
+      "license_spdx": "MIT",
+      "allowed_reuse": "adapt-with-notice",
+      "review_status": "inspiration-only",
+      "copied_files": []
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: setup-new-project
+description: ux-setup on a project without docs/ux, with interview answers given up front and no question tool.
+tags: [setup, smoke]
+plugins: ["../.."]
+context:
+  scaffold_script: fixture.sh
