@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import { mkdirSync, symlinkSync } from "node:fs";
+import { mkdirSync, readFileSync, symlinkSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { detectHosts, targetDirs } from "../../src/install/hosts.ts";
-import { planInstall } from "../../src/install/plan.ts";
+import { assertInsideRoot, planInstall } from "../../src/install/plan.ts";
 import { applyInstall } from "../../src/install/apply.ts";
 import { createFakePackage, tempDir, write } from "./helpers.ts";
 
@@ -119,4 +119,43 @@ test("single skill installs complete with its references", () => {
   ]);
   assert.throws(() => planInstall({sourceRoot, root, targets: [join(root, ".claude/skills")], skills: ["nope"]}),
     /unknown skill/);
+});
+
+test("symlinked target file inside root is refused", () => {
+  const sourceRoot = createFakePackage();
+  const root = tempDir("project");
+  write(join(root, "README.md"), "readme\n");
+  mkdirSync(join(root, ".claude/skills/ux-a"), {recursive: true});
+  symlinkSync("../../../README.md", join(root, ".claude/skills/ux-a/SKILL.md"));
+  assert.throws(() => planInstall({sourceRoot, root, targets: [join(root, ".claude/skills")]}), /symlink/);
+  assert.equal(readFileSync(join(root, "README.md"), "utf8"), "readme\n");
+});
+
+test("symlinked skill folder inside root is refused", () => {
+  const sourceRoot = createFakePackage();
+  const root = tempDir("project");
+  mkdirSync(join(root, "docs"));
+  mkdirSync(join(root, ".claude/skills"), {recursive: true});
+  symlinkSync("../../docs", join(root, ".claude/skills/ux-a"), "dir");
+  assert.throws(() => planInstall({sourceRoot, root, targets: [join(root, ".claude/skills")]}), /symlink/);
+});
+
+test("target folder that is not a host skills folder is refused", () => {
+  const sourceRoot = createFakePackage();
+  const root = tempDir("project");
+  assert.throws(() => planInstall({sourceRoot, root, targets: [join(root, "src")]}), /not a host skills folder/);
+});
+
+test("crafted record path is refused when planning", () => {
+  const sourceRoot = createFakePackage();
+  const root = tempDir("project");
+  write(join(root, ".ux-engineer/install.json"), JSON.stringify({
+    version: "1", installed_at: "x", backups: [], files: [{path: "src/main.ts", sha256: "0".repeat(64)}]
+  }));
+  assert.throws(() => planInstall({sourceRoot, root, targets: [join(root, ".claude/skills")]}), /invalid record path/);
+});
+
+test("in-root name starting with two dots is inside root", () => {
+  const root = tempDir("project");
+  assert.doesNotThrow(() => assertInsideRoot(root, join(root, "..foo")));
 });

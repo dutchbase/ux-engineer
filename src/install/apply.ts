@@ -1,11 +1,12 @@
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmdirSync, unlinkSync, writeFileSync } from "node:fs";
-import { basename, dirname, join, resolve } from "node:path";
-import { assertInsideRoot, recordPathOf, relativeToRoot, sha256, type InstallPlan, type RecordedFile } from "./plan.ts";
+import { dirname, join, resolve } from "node:path";
+import { assertInsideRoot, assertSafeSkillFile, readRecord, recordPathOf, relativeToRoot, sha256, type InstallPlan, type InstallRecord,
+  type RecordedFile } from "./plan.ts";
 
-export type InstallRecord = { version: string; installed_at: string; files: RecordedFile[]; backups: { path: string; backup: string }[] };
+export type { InstallRecord } from "./plan.ts";
 
-function readRecord(recordPath: string): InstallRecord | null {
-  return existsSync(recordPath) ? JSON.parse(readFileSync(recordPath, "utf8")) as InstallRecord : null;
+function changedSincePlan(target: string): Error {
+  return new Error(`target changed since plan: ${target}; re-run install`);
 }
 
 function writeRecord(recordPath: string, record: InstallRecord): void {
@@ -28,10 +29,18 @@ export function applyInstall(plan: InstallPlan, opts: { force: boolean; now: () 
     return {target, path, backup: `.ux-engineer/backup/${stamp}/${path}`};
   });
 
-  // Re-check every path before the first write: the tree may have changed since planInstall.
+  // Re-check every path and its content before the first write: the tree may have changed since planInstall.
   assertInsideRoot(root, plan.recordPath);
-  for (const {target} of writes) assertInsideRoot(root, target);
+  for (const {target} of writes) assertSafeSkillFile(root, target);
   for (const {backup} of backupsToMake) assertInsideRoot(root, join(root, backup));
+  for (const action of plan.actions) {
+    if (action.kind === "create" && existsSync(action.target)) throw changedSincePlan(action.target);
+    if (action.kind === "update") {
+      const recordedSha = files.get(relativeToRoot(root, action.target));
+      if (!existsSync(action.target) || sha256(readFileSync(action.target)) !== recordedSha) throw changedSincePlan(action.target);
+    }
+  }
+  for (const {target} of plan.conflicts) if (!existsSync(target)) throw changedSincePlan(target);
 
   // Save the record even if a write fails halfway, so every file written so far stays owned (and removable).
   let record: InstallRecord;
@@ -41,10 +50,12 @@ export function applyInstall(plan: InstallPlan, opts: { force: boolean; now: () 
       copyFileSync(target, join(root, backup));
       backups.push({path, backup});
     }
-    for (const {source, target} of writes) {
+    for (const write of writes) {
+      const {source, target} = write;
       const bytes = readFileSync(source);
       mkdirSync(dirname(target), {recursive: true});
-      writeFileSync(target, bytes);
+      // "wx" fails if a create target appeared after the check above, so a new user file is never overwritten.
+      writeFileSync(target, bytes, {flag: "kind" in write && write.kind === "create" ? "wx" : "w"});
       files.set(relativeToRoot(root, target), sha256(bytes));
     }
     // skip-identical files not in the record stay unrecorded: we did not create them, so uninstall must not delete them.
@@ -69,19 +80,21 @@ function saveRecord(plan: InstallPlan, previous: InstallRecord | null, files: Ma
   return record;
 }
 
-export function uninstall(root: string): { removed: string[]; keptModified: string[]; restored: string[] } {
+export function uninstall(root: string): { removed: string[]; keptModified: string[]; restored: string[]; missingBackups: string[] } {
   root = resolve(root);
   const recordPath = recordPathOf(root);
   const record = readRecord(recordPath);
   const removed: string[] = [];
   const keptModified: string[] = [];
   const restored: string[] = [];
-  if (!record) return {removed, keptModified, restored};
+  const missingBackups: string[] = [];
+  if (!record) return {removed, keptModified, restored, missingBackups};
 
-  // Refuse the whole uninstall before touching anything if any recorded path escapes root.
-  for (const {path} of record.files) assertInsideRoot(root, join(root, path));
+  // Refuse the whole uninstall before touching anything if any recorded path escapes the skill folders.
+  // readRecord already checked the path shapes; this adds the realpath and symlink checks.
+  for (const {path} of record.files) assertSafeSkillFile(root, join(root, path));
   for (const {path, backup} of record.backups) {
-    assertInsideRoot(root, join(root, path));
+    assertSafeSkillFile(root, join(root, path));
     assertInsideRoot(root, join(root, backup));
   }
 
@@ -107,22 +120,32 @@ export function uninstall(root: string): { removed: string[]; keptModified: stri
       keptBackups.push(entry);
       continue;
     }
+    // A lost backup must not block uninstall forever: report it and drop it from the record.
+    if (!existsSync(join(root, entry.backup))) {
+      missingBackups.push(entry.path);
+      continue;
+    }
     mkdirSync(dirname(target), {recursive: true});
     copyFileSync(join(root, entry.backup), target);
     restored.push(entry.path);
   }
 
-  for (const path of removed) removeEmptyFolders(root, dirname(join(root, path)));
+  for (const path of removed) removeEmptyFolders(root, path);
 
   if (keptFiles.length === 0 && keptBackups.length === 0) unlinkSync(recordPath);
   else writeRecord(recordPath, {...record, files: keptFiles, backups: keptBackups});
-  return {removed, keptModified, restored};
+  return {removed, keptModified, restored, missingBackups};
 }
 
-/** Removes empty folders up to (not including) the host `skills` folder or root. Backup files are never deleted. */
-function removeEmptyFolders(root: string, dir: string): void {
-  while (dir !== root && dir.startsWith(root) && basename(dir) !== "skills" && existsSync(dir) && readdirSync(dir).length === 0) {
+/**
+ * Removes the empty folders a removed file lived in, from its parent up to and including its
+ * `<host>/skills/<skill>/` folder. Never touches the `skills/` folder or anything above it.
+ */
+function removeEmptyFolders(root: string, recordedPath: string): void {
+  const segments = recordedPath.split("/");
+  for (let depth = segments.length - 1; depth >= 3; depth--) {
+    const dir = join(root, ...segments.slice(0, depth));
+    if (!existsSync(dir) || readdirSync(dir).length > 0) return;
     rmdirSync(dir);
-    dir = dirname(dir);
   }
 }

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { planInstall } from "../../src/install/plan.ts";
@@ -95,6 +95,75 @@ test("uninstall refuses recorded paths outside root", () => {
     version: "9.9.9", installed_at: "x", backups: [],
     files: [{path: `../${outside.split("/").pop()}/keep.md`, sha256: "0".repeat(64)}]
   }));
-  assert.throws(() => uninstall(root), /outside/);
+  assert.throws(() => uninstall(root), /invalid record path/);
   assert.equal(existsSync(join(outside, "keep.md")), true);
+});
+
+function writeRecord(root: string, record: object): void {
+  write(join(root, ".ux-engineer/install.json"), JSON.stringify({version: "9.9.9", installed_at: "x", files: [], backups: [], ...record}));
+}
+
+test("uninstall refuses a recorded file outside the skill folders", () => {
+  const root = tempDir("project");
+  write(join(root, "src/main.ts"), "main\n");
+  const hash = "e1b4ad1a8f0aa25b2e8e3b0e2f9c1f3c8a1ddc7a9e45b8b1f2a8bb3c0a0f0b9e";
+  writeRecord(root, {files: [{path: "src/main.ts", sha256: hash}]});
+  assert.throws(() => uninstall(root), /invalid record path/);
+  writeRecord(root, {files: [{path: ".claude/skills/x/../../../src/main.ts", sha256: hash}]});
+  assert.throws(() => uninstall(root), /invalid record path/);
+  assert.equal(readFileSync(join(root, "src/main.ts"), "utf8"), "main\n");
+});
+
+test("uninstall refuses a backup that restores outside the skill folders", () => {
+  const root = tempDir("project");
+  write(join(root, ".ux-engineer/backup/t/hook"), "#!/bin/sh\n");
+  writeRecord(root, {backups: [{path: ".git/hooks/pre-commit", backup: ".ux-engineer/backup/t/hook"}]});
+  assert.throws(() => uninstall(root), /invalid record path/);
+  assert.equal(existsSync(join(root, ".git/hooks/pre-commit")), false);
+  writeRecord(root, {backups: [{path: ".claude/skills/ux-a/SKILL.md", backup: "src/secret.txt"}]});
+  assert.throws(() => uninstall(root), /invalid record path/);
+});
+
+test("apply refuses a create target that appeared after the plan", () => {
+  const sourceRoot = createFakePackage();
+  const root = tempDir("project");
+  const plan = planInstall({sourceRoot, root, targets: [join(root, ".claude/skills")]});
+  write(join(root, ".claude/skills/ux-b/SKILL.md"), "new user file\n");
+  assert.throws(() => applyInstall(plan, {force: false, now}), /target changed since plan: .*ux-b\/SKILL.md; re-run install/);
+  assert.equal(readFileSync(join(root, ".claude/skills/ux-b/SKILL.md"), "utf8"), "new user file\n");
+});
+
+test("apply refuses an update target edited after the plan", () => {
+  const sourceRoot = createFakePackage();
+  const root = tempDir("project");
+  const targets = [join(root, ".claude/skills")];
+  applyInstall(planInstall({sourceRoot, root, targets}), {force: false, now});
+  write(join(sourceRoot, "skills/ux-a/SKILL.md"), "ux-a skill v2\n");
+  const plan = planInstall({sourceRoot, root, targets});
+  write(join(root, ".claude/skills/ux-a/SKILL.md"), "my edit\n");
+  assert.throws(() => applyInstall(plan, {force: true, now}), /target changed since plan/);
+  assert.equal(readFileSync(join(root, ".claude/skills/ux-a/SKILL.md"), "utf8"), "my edit\n");
+});
+
+test("forced conflict backs up the bytes present at apply time", () => {
+  const sourceRoot = createFakePackage();
+  const root = tempDir("project");
+  write(join(root, ".claude/skills/ux-a/SKILL.md"), "someone else\n");
+  const plan = planInstall({sourceRoot, root, targets: [join(root, ".claude/skills")]});
+  write(join(root, ".claude/skills/ux-a/SKILL.md"), "someone else, later\n");
+  const record = applyInstall(plan, {force: true, now});
+  assert.equal(readFileSync(join(root, record.backups[0].backup), "utf8"), "someone else, later\n");
+});
+
+test("uninstall finishes when a backup file is missing", () => {
+  const sourceRoot = createFakePackage();
+  const root = tempDir("project");
+  write(join(root, ".claude/skills/ux-a/SKILL.md"), "someone else\n");
+  applyInstall(planInstall({sourceRoot, root, targets: [join(root, ".claude/skills")]}), {force: true, now});
+  rmSync(join(root, ".ux-engineer/backup"), {recursive: true});
+  const result = uninstall(root);
+  assert.deepEqual(result.missingBackups, [".claude/skills/ux-a/SKILL.md"]);
+  assert.deepEqual(result.restored, []);
+  assert.equal(result.removed.length, 3);
+  assert.equal(existsSync(join(root, ".ux-engineer/install.json")), false);
 });
