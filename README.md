@@ -3,7 +3,7 @@
 A plugin for Claude Code, Codex, OpenCode and Claude desktop that makes coding agents design for real people before they build a UI.
 
 > [!IMPORTANT]
-> Early development. Three commands work but are experimental: `ux-setup`, `ux-plan` and `ux-audit`. Everything else in this README is planned. The full design is in [`docs/design.md`](docs/design.md), and known gaps are in [`docs/limitations.md`](docs/limitations.md).
+> Early development. Five commands work but are experimental: `ux-setup`, `ux-plan`, `ux-audit`, `ux-research` and `ux-accessibility`. Everything else in this README is planned. The full design is in [`docs/design.md`](docs/design.md), and known gaps are in [`docs/limitations.md`](docs/limitations.md).
 
 ## Install
 
@@ -29,6 +29,8 @@ Then, in your project:
 - `/ux-engineer:ux-setup` (Claude) or `$ux-setup` (Codex) interviews you about your users and writes `docs/ux/project.json`. For a long interview, install [Brainstormform](https://github.com/dutchbase/Brainstormform) first; without it, the plugin asks its questions in the chat.
 - `/ux-engineer:ux-plan <feature>` or `$ux-plan` designs the flow for a feature: steps, error and recovery states, UX copy in your tone, and acceptance criteria your coding agent can test. It writes `docs/ux/flows/<flow-id>.json` and a readable `.md` next to it. A tiny change gets a short answer and no files.
 - `/ux-engineer:ux-audit` or `$ux-audit` walks through a task in your running app (local, staging or preview) in a real browser, at phone, tablet, laptop and wide-screen sizes. It writes findings with screenshots as evidence and a Markdown and HTML report to `.ux/runs/`. It uses your agent's browser tool, or the [Playwright CLI](https://github.com/microsoft/playwright-cli) if there is none, and it needs Node 18 or newer.
+- `/ux-engineer:ux-research <question>` or `$ux-research` looks up best practices on the web, summarizes tickets, interviews or notes you supply, or writes a plan for a study when no data exists. It writes `docs/ux/research/<research-id>.json` and a readable `.md`. It counts people and reports separately, never invents quotes, and does not replace research with real users.
+- `/ux-engineer:ux-accessibility` or `$ux-accessibility` writes testable WCAG 2.2 AA acceptance criteria for a design, or checks a running app with keyboard checks and axe in a browser. Results go to `.ux/runs/`. A clean scan is never reported as "accessible" or "compliant". It is not a certification, and checks that did not run stay `not_run`.
 
 ## Why
 
@@ -44,10 +46,10 @@ UX Engineer is a small set of agent skills. It never writes application code. It
 |---|---|
 | `ux-orchestrator` | Works out what kind of request this is and how much process it deserves. A two-pixel change gets a quick check, not an audit. |
 | `ux-framing` | Interviews you about your users and builds personas, task goals and success criteria. Guesses are labeled as guesses. |
-| `ux-research` | Looks up best practices and competitor patterns on the web, summarizes real user data if you have any, and plans research if you don't. |
+| `ux-research` (experimental) | Looks up best practices and competitor patterns on the web, summarizes real user data if you have any, and plans research if you don't. |
 | `ux-flow-design` | Designs flows with all the states that usually get forgotten: empty, loading, errors, expired sessions, double clicks, going back. Includes UX copy. |
 | `ux-audit` | Opens your app in a real browser, walks through tasks at phone, tablet, laptop and wide-screen sizes, and reports problems with evidence. |
-| `ux-accessibility` | Builds WCAG 2.2 AA requirements into designs and checks them, without pretending an automated scan proves compliance. |
+| `ux-accessibility` (experimental) | Builds WCAG 2.2 AA requirements into designs and checks them, without pretending an automated scan proves compliance. |
 
 Everything the plugin learns about your product (personas, key flows, tone of voice, target screen sizes, decisions) is stored in your project repository under `docs/ux/`, so every agent and every teammate works from the same picture.
 
@@ -88,7 +90,7 @@ One repository, one copy of each skill, thin adapters per host. Details are in [
     findings with evidence, report in Markdown and HTML
 ```
 
-All three commands exist today, as experimental versions.
+All five commands exist today, as experimental versions.
 
 ## Roadmap
 
