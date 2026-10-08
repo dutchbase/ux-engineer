@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "research_id": "onboarding-drop-off",
+  "product_id": "acme-invoices",
+  "question": "Why do new users stop before sending a first invoice?",
+  "route": "synthesis",
+  "created_at": "2026-10-08T09:00:00Z",
+  "source_inventory": [
+    {
+      "source_id": "S-INT-1",
+      "kind": "interview",
+      "title": "Source S-INT-1",
+      "ref": "data/interview-1.md",
+      "participant_id": "P-01",
+      "date": "2026-09-01",
+      "consent": "obtained"
+    },
+    {
+      "source_id": "S-INT-2",
+      "kind": "interview",
+      "title": "Source S-INT-2",
+      "ref": "data/interview-2.md",
+      "participant_id": "P-02",
+      "date": "2026-09-01",
+      "consent": "obtained"
+    },
+    {
+      "source_id": "S-TKT-1",
+      "kind": "support_ticket",
+      "title": "Source S-TKT-1",
+      "ref": "data/ticket-1.md",
+      "participant_id": "P-01",
+      "date": "2026-09-01",
+      "consent": "unknown"
+    },
+    {
+      "source_id": "S-TKT-2",
+      "kind": "support_ticket",
+      "title": "Source S-TKT-2",
+      "ref": "data/ticket-2.md",
+      "participant_id": "P-01",
+      "date": "2026-09-01",
+      "consent": "unknown"
+    },
+    {
+      "source_id": "S-WEB-1",
+      "kind": "web",
+      "title": "Source S-WEB-1",
+      "ref": "https://example.com/invoice-habits",
+      "participant_id": null,
+      "date": "2026-09-01",
+      "consent": "not_applicable"
+    }
+  ],
+  "observations": [
+    {
+      "observation_id": "O-1",
+      "text": "P-01 could not find where to add a client.",
+      "source_ids": [
+        "S-INT-1",
+        "S-TKT-1",
+        "S-TKT-2"
+      ]
+    },
+    {
+      "observation_id": "O-2",
+      "text": "P-02 added a client but skipped the tax field.",
+      "source_ids": [
+        "S-INT-2"
+      ]
+    },
+    {
+      "observation_id": "O-3",
+      "text": "A blog post says small firms often send invoices by email first.",
+      "source_ids": [
+        "S-WEB-1"
+      ]
+    }
+  ],
+  "interpretations": [
+    {
+      "interpretation_id": "I-1",
+      "text": "The add-client entry point is hard to find.",
+      "observation_ids": [
+        "O-1",
+        "O-NOPE"
+      ],
+      "people_count": 2,
+      "report_count": 4,
+      "confidence": "low",
+      "confidence_reason": "Two participants only.",
+      "status": "supported"
+    },
+    {
+      "interpretation_id": "I-2",
+      "text": "Users may prefer email over in-app sending.",
+      "observation_ids": [
+        "O-3"
+      ],
+      "people_count": null,
+      "report_count": null,
+      "confidence": "low",
+      "confidence_reason": "Web source only.",
+      "status": "hypothesis"
+    }
+  ],
+  "counterevidence": [
+    {
+      "text": "P-02 found the add-client button at once.",
+      "source_ids": [
+        "S-INT-2"
+      ]
+    }
+  ],
+  "gaps": [
+    "No data on users who never opened the app."
+  ],
+  "next_methods": [
+    {
+      "method": "Moderated usability test",
+      "question": "Can new users add a client unaided?",
+      "participants": "5 new users",
+      "notes": null
+    }
+  ],
+  "plan": null
+}

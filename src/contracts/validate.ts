@@ -7,10 +7,11 @@ import runSchema from "../../schemas/run.schema.json" with { type: "json" };
 import evidenceSchema from "../../schemas/evidence.schema.json" with { type: "json" };
 import findingsSchema from "../../schemas/findings.schema.json" with { type: "json" };
 import flowSchema from "../../schemas/flow.schema.json" with { type: "json" };
+import researchSchema from "../../schemas/research.schema.json" with { type: "json" };
 import type { Flow } from "../reports/flow.ts";
 import type { Evidence, Findings, Run } from "./run.ts";
 
-export type Kind = "project" | "checks" | "run" | "evidence" | "findings" | "flow";
+export type Kind = "project" | "checks" | "run" | "evidence" | "findings" | "flow" | "research";
 export type ValidationError = { path: string; message: string };
 export type Result<T> = { ok: true; data: T } | { ok: false; errors: ValidationError[] };
 
@@ -44,6 +45,15 @@ type Checks = {
   checks: { result: string; not_applicable_reason?: string }[];
 };
 
+type Research = {
+  route: "web_research" | "synthesis" | "plan";
+  source_inventory: {source_id: string; kind: string; participant_id: string | null}[];
+  observations: {observation_id: string; source_ids: string[]}[];
+  interpretations: {interpretation_id: string; observation_ids: string[]; people_count: number | null; status: string}[];
+  counterevidence: {source_ids: string[]}[];
+  plan: object | null;
+};
+
 type AjvInstance = { compile(schema: object): ValidateFunction };
 type AjvConstructor = new (options: { allErrors: boolean }) => AjvInstance;
 
@@ -56,7 +66,8 @@ const validators: Record<Kind, ValidateFunction> = {
   run: ajv.compile(runSchema),
   evidence: ajv.compile(evidenceSchema),
   findings: ajv.compile(findingsSchema),
-  flow: ajv.compile(flowSchema)
+  flow: ajv.compile(flowSchema),
+  research: ajv.compile(researchSchema)
 };
 
 const jsonPath = (path: string): string => path || "/";
@@ -218,6 +229,54 @@ function flowSemanticErrors(flow: Flow): ValidationError[] {
   return errors;
 }
 
+function researchSemanticErrors(research: Research): ValidationError[] {
+  const errors: ValidationError[] = [];
+  const duplicates = (items: {id: string; path: string}[]) => {
+    const seen = new Set<string>();
+    for (const {id, path} of items) {
+      if (seen.has(id)) errors.push({path, message: `duplicate id "${id}"`});
+      seen.add(id);
+    }
+  };
+  duplicates(research.source_inventory.map((source, i) => ({id: source.source_id, path: `/source_inventory/${i}/source_id`})));
+  duplicates(research.observations.map((o, i) => ({id: o.observation_id, path: `/observations/${i}/observation_id`})));
+  duplicates(research.interpretations.map((x, i) => ({id: x.interpretation_id, path: `/interpretations/${i}/interpretation_id`})));
+
+  const sources = new Map(research.source_inventory.map((source) => [source.source_id, source]));
+  const observations = new Map(research.observations.map((o) => [o.observation_id, o]));
+  const checkSources = (ids: string[], path: string) =>
+    ids.forEach((id, j) => {
+      if (!sources.has(id)) errors.push({path: `${path}/${j}`, message: `unknown source "${id}"`});
+    });
+  research.observations.forEach((o, i) => checkSources(o.source_ids, `/observations/${i}/source_ids`));
+  research.counterevidence.forEach((c, i) => checkSources(c.source_ids, `/counterevidence/${i}/source_ids`));
+
+  research.interpretations.forEach((interpretation, i) => {
+    const cited = interpretation.observation_ids.flatMap((id, j) => {
+      const observation = observations.get(id);
+      if (!observation) errors.push({path: `/interpretations/${i}/observation_ids/${j}`, message: `unknown observation "${id}"`});
+      return observation ? observation.source_ids : [];
+    });
+    const behind = [...new Set(cited)].flatMap((id) => sources.get(id) ?? []);
+    const participants = new Set(behind.flatMap((source) => source.participant_id ?? []));
+    if (interpretation.people_count !== null && interpretation.people_count > participants.size) {
+      errors.push({
+        path: `/interpretations/${i}/people_count`,
+        message: `people_count ${interpretation.people_count} exceeds ${participants.size} distinct participants in the cited sources`
+      });
+    }
+    if (behind.length > 0 && behind.every((source) => source.kind === "web") && interpretation.status !== "hypothesis") {
+      errors.push({path: `/interpretations/${i}/status`, message: "interpretation resting only on web sources must have status hypothesis"});
+    }
+  });
+
+  if (research.route === "plan") {
+    if (research.plan === null) errors.push({path: "/plan", message: "route plan requires a non-null plan"});
+    if (research.observations.length > 0) errors.push({path: "/observations", message: "route plan requires empty observations"});
+  }
+  return errors;
+}
+
 export function validateArtifact(kind: Kind, input: unknown): Result<unknown> {
   if (
     typeof input === "object" &&
@@ -241,6 +300,8 @@ export function validateArtifact(kind: Kind, input: unknown): Result<unknown> {
           ? findingsSemanticErrors(input as Findings)
           : kind === "flow"
             ? flowSemanticErrors(input as Flow)
-            : [];
+            : kind === "research"
+              ? researchSemanticErrors(input as Research)
+              : [];
   return errors.length > 0 ? {ok: false, errors} : {ok: true, data: input};
 }

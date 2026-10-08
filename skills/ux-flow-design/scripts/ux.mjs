@@ -8708,6 +8708,120 @@ var flow_schema_default = {
   }
 };
 
+// schemas/research.schema.json
+var research_schema_default = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  $id: "https://github.com/dutchbase/ux-engineer/schemas/research.schema.json",
+  type: "object",
+  additionalProperties: false,
+  required: ["schema_version", "research_id", "product_id", "question", "route", "created_at", "source_inventory", "observations", "interpretations", "counterevidence", "gaps", "next_methods", "plan"],
+  $defs: {
+    id: { type: "string", pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    strings: { type: "array", items: { type: "string" } },
+    nullableString: { type: ["string", "null"] },
+    count: { type: ["integer", "null"], minimum: 0 }
+  },
+  properties: {
+    schema_version: { const: "1.0" },
+    research_id: { $ref: "#/$defs/id" },
+    product_id: { $ref: "#/$defs/id" },
+    question: { type: "string" },
+    route: { enum: ["web_research", "synthesis", "plan"] },
+    created_at: { type: "string", format: "date-time" },
+    source_inventory: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["source_id", "kind", "title", "ref", "participant_id", "date", "consent"],
+        properties: {
+          source_id: { type: "string", pattern: "^S-[A-Z0-9-]+$" },
+          kind: { enum: ["interview", "support_ticket", "test_note", "survey", "analytics", "web", "other"] },
+          title: { type: "string" },
+          ref: { $ref: "#/$defs/nullableString" },
+          participant_id: { $ref: "#/$defs/nullableString" },
+          date: { oneOf: [{ type: "string", format: "date" }, { type: "null" }] },
+          consent: { enum: ["not_applicable", "obtained", "unknown"] }
+        }
+      }
+    },
+    observations: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["observation_id", "text", "source_ids"],
+        properties: {
+          observation_id: { type: "string", pattern: "^O-[A-Z0-9-]+$" },
+          text: { type: "string" },
+          source_ids: { type: "array", minItems: 1, items: { type: "string" } }
+        }
+      }
+    },
+    interpretations: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["interpretation_id", "text", "observation_ids", "people_count", "report_count", "confidence", "confidence_reason", "status"],
+        properties: {
+          interpretation_id: { type: "string", pattern: "^I-[A-Z0-9-]+$" },
+          text: { type: "string" },
+          observation_ids: { type: "array", minItems: 1, items: { type: "string" } },
+          people_count: { $ref: "#/$defs/count" },
+          report_count: { $ref: "#/$defs/count" },
+          confidence: { enum: ["high", "medium", "low"] },
+          confidence_reason: { type: "string" },
+          status: { enum: ["supported", "hypothesis"] }
+        }
+      }
+    },
+    counterevidence: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["text", "source_ids"],
+        properties: {
+          text: { type: "string" },
+          source_ids: { type: "array", items: { type: "string" } }
+        }
+      }
+    },
+    gaps: { $ref: "#/$defs/strings" },
+    next_methods: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["method", "question", "participants", "notes"],
+        properties: {
+          method: { type: "string" },
+          question: { type: "string" },
+          participants: { type: "string" },
+          notes: { $ref: "#/$defs/nullableString" }
+        }
+      }
+    },
+    plan: {
+      oneOf: [
+        { type: "null" },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["research_questions", "screener", "tasks", "consent_and_data"],
+          properties: {
+            research_questions: { $ref: "#/$defs/strings" },
+            screener: { $ref: "#/$defs/strings" },
+            tasks: { $ref: "#/$defs/strings" },
+            consent_and_data: { type: "string" }
+          }
+        }
+      ]
+    }
+  }
+};
+
 // src/contracts/validate.ts
 var ajv = new import__.default({ allErrors: true });
 (0, import_ajv_formats.default)(ajv);
@@ -8717,7 +8831,8 @@ var validators = {
   run: ajv.compile(run_schema_default),
   evidence: ajv.compile(evidence_schema_default),
   findings: ajv.compile(findings_schema_default),
-  flow: ajv.compile(flow_schema_default)
+  flow: ajv.compile(flow_schema_default),
+  research: ajv.compile(research_schema_default)
 };
 var jsonPath = (path) => path || "/";
 var schemaErrors = (validator) => (validator.errors ?? []).map((error) => ({
@@ -8851,13 +8966,56 @@ function flowSemanticErrors(flow) {
   }
   return errors;
 }
+function researchSemanticErrors(research) {
+  const errors = [];
+  const duplicates = (items) => {
+    const seen = /* @__PURE__ */ new Set();
+    for (const { id, path } of items) {
+      if (seen.has(id)) errors.push({ path, message: `duplicate id "${id}"` });
+      seen.add(id);
+    }
+  };
+  duplicates(research.source_inventory.map((source, i) => ({ id: source.source_id, path: `/source_inventory/${i}/source_id` })));
+  duplicates(research.observations.map((o, i) => ({ id: o.observation_id, path: `/observations/${i}/observation_id` })));
+  duplicates(research.interpretations.map((x, i) => ({ id: x.interpretation_id, path: `/interpretations/${i}/interpretation_id` })));
+  const sources = new Map(research.source_inventory.map((source) => [source.source_id, source]));
+  const observations = new Map(research.observations.map((o) => [o.observation_id, o]));
+  const checkSources = (ids, path) => ids.forEach((id, j) => {
+    if (!sources.has(id)) errors.push({ path: `${path}/${j}`, message: `unknown source "${id}"` });
+  });
+  research.observations.forEach((o, i) => checkSources(o.source_ids, `/observations/${i}/source_ids`));
+  research.counterevidence.forEach((c, i) => checkSources(c.source_ids, `/counterevidence/${i}/source_ids`));
+  research.interpretations.forEach((interpretation, i) => {
+    const cited = interpretation.observation_ids.flatMap((id, j) => {
+      const observation = observations.get(id);
+      if (!observation) errors.push({ path: `/interpretations/${i}/observation_ids/${j}`, message: `unknown observation "${id}"` });
+      return observation ? observation.source_ids : [];
+    });
+    const behind = [...new Set(cited)].flatMap((id) => sources.get(id) ?? []);
+    const participants = new Set(behind.flatMap((source) => source.participant_id ?? []));
+    if (interpretation.people_count !== null && interpretation.people_count > participants.size) {
+      errors.push({
+        path: `/interpretations/${i}/people_count`,
+        message: `people_count ${interpretation.people_count} exceeds ${participants.size} distinct participants in the cited sources`
+      });
+    }
+    if (behind.length > 0 && behind.every((source) => source.kind === "web") && interpretation.status !== "hypothesis") {
+      errors.push({ path: `/interpretations/${i}/status`, message: "interpretation resting only on web sources must have status hypothesis" });
+    }
+  });
+  if (research.route === "plan") {
+    if (research.plan === null) errors.push({ path: "/plan", message: "route plan requires a non-null plan" });
+    if (research.observations.length > 0) errors.push({ path: "/observations", message: "route plan requires empty observations" });
+  }
+  return errors;
+}
 function validateArtifact(kind, input) {
   if (typeof input === "object" && input !== null && typeof input.schema_version === "string" && !input.schema_version.startsWith("1.")) {
     return { ok: false, errors: [{ path: "/schema_version", message: "unsupported schema major" }] };
   }
   const validator = validators[kind];
   if (!validator(input)) return { ok: false, errors: schemaErrors(validator) };
-  const errors = kind === "project" ? projectSemanticErrors(input) : kind === "checks" ? checksSemanticErrors(input) : kind === "evidence" ? evidenceSemanticErrors(input) : kind === "findings" ? findingsSemanticErrors(input) : kind === "flow" ? flowSemanticErrors(input) : [];
+  const errors = kind === "project" ? projectSemanticErrors(input) : kind === "checks" ? checksSemanticErrors(input) : kind === "evidence" ? evidenceSemanticErrors(input) : kind === "findings" ? findingsSemanticErrors(input) : kind === "flow" ? flowSemanticErrors(input) : kind === "research" ? researchSemanticErrors(input) : [];
   return errors.length > 0 ? { ok: false, errors } : { ok: true, data: input };
 }
 
@@ -8944,7 +9102,7 @@ function validateRunDir(dir) {
 }
 
 // src/cli.ts
-var usage = "usage: node ux.mjs validate <project|checks|run|evidence|findings|flow> <file> | validate-run <dir> | render <dir> [--format md|html|both] | render-flow <flow.json> | status <checks.json> [--blocker <text>]...";
+var usage = "usage: node ux.mjs validate <project|checks|run|evidence|findings|flow|research> <file> | validate-run <dir> | render <dir> [--format md|html|both] | render-flow <flow.json> | status <checks.json> [--blocker <text>]...";
 var formattedErrors = (result) => result.errors.map((error) => `${error.path}: ${error.message}`);
 function readJson2(path) {
   return JSON.parse(readFileSync2(path, "utf8"));
@@ -8966,7 +9124,7 @@ function parseChecks(file) {
 }
 function runCli(args) {
   const [command, ...rest] = args;
-  if (command === "validate" && rest.length === 2 && ["project", "checks", "run", "evidence", "findings", "flow"].includes(rest[0])) {
+  if (command === "validate" && rest.length === 2 && ["project", "checks", "run", "evidence", "findings", "flow", "research"].includes(rest[0])) {
     return validateFile(rest[0], rest[1]);
   }
   if (command === "validate-run" && rest.length === 1) {

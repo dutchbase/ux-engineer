@@ -7,7 +7,7 @@ import { validateRunDir } from "./contracts/run.ts";
 import { deriveRunStatus, type Check } from "./contracts/verdict.ts";
 import { validateArtifact, type Kind, type Result } from "./contracts/validate.ts";
 
-const usage = "usage: node ux.mjs validate <project|checks|run|evidence|findings|flow> <file> | validate-run <dir> | render <dir> [--format md|html|both] | render-flow <flow.json> | status <checks.json> [--blocker <text>]...";
+const usage = "usage: node ux.mjs validate <project|checks|run|evidence|findings|flow|research> <file> | validate-run <dir> | render <dir> [--format md|html|both] | render-flow <flow.json> | status <checks.json> [--blocker <text>]...";
 
 export type CliResult = { status: 0 | 1 | 2; output: string[]; errors: string[] };
 
@@ -37,7 +37,7 @@ function parseChecks(file: string): Result<{schema_version: string; run_id: stri
 
 export function runCli(args: string[]): CliResult {
   const [command, ...rest] = args;
-  if (command === "validate" && rest.length === 2 && ["project", "checks", "run", "evidence", "findings", "flow"].includes(rest[0])) {
+  if (command === "validate" && rest.length === 2 && ["project", "checks", "run", "evidence", "findings", "flow", "research"].includes(rest[0])) {
     return validateFile(rest[0] as Kind, rest[1]);
   }
 

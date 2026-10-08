@@ -78,3 +78,10 @@ test("CLI render-flow writes nothing for an invalid flow and exits 2 on bad inpu
   assert.equal(runCli(["render-flow"]).status, 2);
   assert.equal(runCli(["render-flow", join(dir, "missing.json")]).status, 2);
 });
+
+test("CLI validates a research artifact", () => {
+  const file = fileURLToPath(new URL("../fixtures/research/valid-synthesis.json", import.meta.url));
+  const result = runCli(["validate", "research", file]);
+  assert.equal(result.status, 0);
+  assert.deepEqual(result.output, ["valid"]);
+});

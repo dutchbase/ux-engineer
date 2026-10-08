@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "research_id": "onboarding-drop-off",
+  "product_id": "acme-invoices",
+  "question": "Why do new users stop before sending a first invoice?",
+  "route": "plan",
+  "created_at": "2026-10-08T09:00:00Z",
+  "source_inventory": [],
+  "observations": [],
+  "interpretations": [],
+  "counterevidence": [],
+  "gaps": [
+    "No research data yet."
+  ],
+  "next_methods": [],
+  "plan": {
+    "research_questions": [
+      "Where do new users get stuck before the first invoice?"
+    ],
+    "screener": [
+      "Signed up in the last 30 days",
+      "Has not sent an invoice"
+    ],
+    "tasks": [
+      "Add a client",
+      "Create and send an invoice"
+    ],
+    "consent_and_data": "Ask written consent. Store recordings 90 days. Use pseudonymous ids."
+  }
+}
