@@ -76,6 +76,10 @@ references before the matching work:
    project viewports, or use `390x844`, `820x1180`, `1440x900`, and `1920x1080`.
    Record every untested row and its reason.
 
+   When the scope includes accessibility, follow `references/accessibility.md`
+   for the criteria, check methods, and claim limits, or use the
+   `ux-accessibility` skill.
+
    Start with black-box observation. For each task step, record the expected
    result and the actual visible, saved, and recoverable result. Save action
    logs and screenshots only for actions that happened. Save or move every

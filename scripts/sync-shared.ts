@@ -17,6 +17,7 @@ export const sharedFiles = {
     {source: "shared/policies/evidence.md", folder: "references"},
     {source: "shared/policies/safety.md", folder: "references"},
     {source: "shared/references/audit-method.md", folder: "references"},
+    {source: "shared/references/accessibility.md", folder: "references"},
     {source: "schemas/run.schema.json", folder: "references"},
     {source: "schemas/evidence.schema.json", folder: "references"},
     {source: "schemas/findings.schema.json", folder: "references"},
@@ -29,6 +30,7 @@ export const sharedFiles = {
     {source: "shared/references/forms.md", folder: "references"},
     {source: "shared/references/information-architecture.md", folder: "references"},
     {source: "shared/references/content-design.md", folder: "references"},
+    {source: "shared/references/accessibility.md", folder: "references"},
     {source: "shared/references/ai-tells.md", folder: "references"},
     {source: "schemas/flow.schema.json", folder: "references"},
     {source: "schemas/project.schema.json", folder: "references"},
@@ -40,6 +42,17 @@ export const sharedFiles = {
     {source: "shared/templates/research-plan.md", folder: "references"},
     {source: "schemas/research.schema.json", folder: "references"},
     {source: "schemas/project.schema.json", folder: "references"},
+    {source: "dist/ux.mjs", folder: "scripts"}
+  ],
+  "ux-accessibility": [
+    {source: "shared/policies/writing.md", folder: "references"},
+    {source: "shared/policies/evidence.md", folder: "references"},
+    {source: "shared/policies/safety.md", folder: "references"},
+    {source: "shared/references/accessibility.md", folder: "references"},
+    {source: "schemas/run.schema.json", folder: "references"},
+    {source: "schemas/evidence.schema.json", folder: "references"},
+    {source: "schemas/findings.schema.json", folder: "references"},
+    {source: "schemas/checks.schema.json", folder: "references"},
     {source: "dist/ux.mjs", folder: "scripts"}
   ],
   "ux-plan": [

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dutchbase/ux-engineer/schemas/findings.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "findings"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run_id": {"type": "string"},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["finding_id", "flow_id", "title", "basis", "status", "severity", "confidence", "confidence_reason", "user_impact", "reach", "context", "evidence_ids", "expected_result", "actual_result", "criterion_refs", "recommendation", "requires_human_validation", "systemic"],
+        "properties": {
+          "finding_id": {"type": "string"}, "flow_id": {"type": ["string", "null"]}, "title": {"type": "string"},
+          "basis": {"enum": ["observed", "code_supported", "user_reported", "measured", "web_sourced", "inferred", "assumed"]},
+          "status": {"enum": ["confirmed", "hypothesis", "needs_validation"]},
+          "severity": {"enum": ["critical", "major", "minor", "advisory"]},
+          "confidence": {"enum": ["high", "medium", "low"]}, "confidence_reason": {"type": "string"}, "user_impact": {"type": "string"}, "reach": {"type": ["string", "null"]},
+          "context": {"type": "object", "additionalProperties": false, "required": ["persona_id", "locale", "viewport"], "properties": {"persona_id": {"type": ["string", "null"]}, "locale": {"type": ["string", "null"]}, "viewport": {"type": ["string", "null"]}}},
+          "evidence_ids": {"type": "array", "items": {"type": "string"}}, "expected_result": {"type": "string"}, "actual_result": {"type": "string"}, "criterion_refs": {"type": "array", "items": {"type": "string"}}, "recommendation": {"type": "string"}, "requires_human_validation": {"type": "boolean"}, "systemic": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}
