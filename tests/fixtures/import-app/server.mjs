@@ -2,8 +2,8 @@ import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { extname, resolve, sep } from "node:path";
 
-const variants = new Set(["correct", "lost-input", "double-action", "confusing-status", "tablet-layout"]);
-const variantCodes = {correct: "k7", "lost-input": "q2", "double-action": "m5", "confusing-status": "t9", "tablet-layout": "r4"};
+const variants = new Set(["correct", "lost-input", "double-action", "confusing-status", "tablet-layout", "a11y-dialog"]);
+const variantCodes = {correct: "k7", "lost-input": "q2", "double-action": "m5", "confusing-status": "t9", "tablet-layout": "r4", "a11y-dialog": "w6"};
 const contentTypes = { ".css": "text/css", ".html": "text/html; charset=utf-8", ".js": "text/javascript" };
 
 function parseArgs(args) {
@@ -15,7 +15,7 @@ function parseArgs(args) {
   const variant = byCode[values["--variant"]] ?? values["--variant"];
   const port = Number(values["--port"]);
   if (!variants.has(variant) || !Number.isInteger(port) || port < 1 || port > 65_535) {
-    throw new Error("Usage: node server.mjs --variant <correct|lost-input|double-action|confusing-status|tablet-layout> --port <n>");
+    throw new Error("Usage: node server.mjs --variant <correct|lost-input|double-action|confusing-status|tablet-layout|a11y-dialog> --port <n>");
   }
   return { variant, port };
 }

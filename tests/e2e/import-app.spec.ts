@@ -136,3 +136,46 @@ test("correct completes the happy path at 390px", async ({ page }) => {
   await page.getByRole("button", { name: "Import", exact: true }).click();
   await expect(page.getByRole("heading", { name: "11 contacts imported, 1 skipped (invalid email)" })).toBeVisible({ timeout: 10_000 });
 });
+
+const inDialog = (page: Page) => page.evaluate(() => Boolean(document.activeElement?.closest("#discard-dialog")));
+// A modal may let Tab leave to the browser UI (body), but never to the page behind it.
+const onPage = (page: Page) => page.evaluate(() => Boolean(document.activeElement?.closest("main")));
+
+test("correct opens a real modal dialog with keyboard support and a labelled Team select", async ({ page }) => {
+  await openMapping(page, "correct");
+  await expect(page.getByLabel("Team")).toHaveAccessibleName("Team");
+  const cancel = page.getByRole("button", { name: "Cancel import" });
+  await cancel.click();
+  const dialog = page.getByRole("dialog", { name: "Discard this import?" });
+  await expect(dialog).toBeVisible();
+  expect(await inDialog(page)).toBe(true);
+  for (let index = 0; index < 4; index++) {
+    await page.keyboard.press("Tab");
+    expect(await onPage(page)).toBe(false);
+  }
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(cancel).toBeFocused();
+  await cancel.click();
+  await page.getByRole("button", { name: "Discard", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Upload contacts" })).toBeVisible();
+});
+
+test("a11y-dialog leaves focus behind the dialog, ignores Escape and leaves Team unnamed", async ({ page }) => {
+  await openMapping(page, "a11y-dialog");
+  await expect(page.locator("#mapping-team")).toHaveAccessibleName("");
+  const cancel = page.getByRole("button", { name: "Cancel import" });
+  await cancel.click();
+  const dialog = page.locator("#discard-dialog");
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText("Discard this import?");
+  await expect(cancel).toBeFocused();
+  expect(await inDialog(page)).toBe(false);
+  await page.keyboard.press("Shift+Tab");
+  await expect(page.getByRole("button", { name: "Import", exact: true })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Keep editing" }).click();
+  await expect(dialog).toBeHidden();
+  await expect.poll(() => inDialog(page)).toBe(false);
+});

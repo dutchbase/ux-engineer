@@ -41,6 +41,7 @@
           </table>
           <button id="import" type="button">Import</button>
         </div>
+        <button id="cancel-import" type="button">Cancel import</button>
       </section>
 
       <section id="step-processing" hidden>
@@ -53,5 +54,12 @@
         <ul id="imported-contacts"></ul>
       </section>
     </main>
+
+    <dialog id="discard-dialog" aria-labelledby="discard-title">
+      <h2 id="discard-title">Discard this import?</h2>
+      <p>Your CSV and column choices will be removed.</p>
+      <button id="keep-editing" type="button">Keep editing</button>
+      <button id="discard" type="button">Discard</button>
+    </dialog>
   </body>
 </html>

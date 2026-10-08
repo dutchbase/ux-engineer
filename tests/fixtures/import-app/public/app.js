@@ -158,6 +158,19 @@ async function startImport() {
   }
 }
 
+const cancelButton = document.querySelector("#cancel-import");
+let dialog = document.querySelector("#discard-dialog");
+
+// Real modal: showModal() moves focus in, traps Tab and closes on Escape.
+cancelButton.addEventListener("click", () => (state.variant === "w6" ? (dialog.hidden = false) : dialog.showModal()));
+document.querySelector("#keep-editing").addEventListener("click", () => (state.variant === "w6" ? (dialog.hidden = true) : dialog.close()));
+document.querySelector("#discard").addEventListener("click", () => {
+  if (state.variant === "w6") dialog.hidden = true;
+  else dialog.close();
+  resetLostInput();
+});
+dialog.addEventListener("close", () => cancelButton.focus());
+
 document.querySelector("#continue").addEventListener("click", () => uploadCsv().catch((reason) => showError(reason.message)));
 importButton.addEventListener("click", startImport);
 for (const select of Object.values(mapping)) select.addEventListener("change", () => state.upload && renderPreview(state.upload));
@@ -167,4 +180,19 @@ fetch("/api/config")
   .then(({ variant }) => {
     state.variant = variant;
     document.body.dataset.variant = variant;
+    if (variant === "w6") useSimpleDialog();
   });
+
+// Variant w6: swap the dialog for a plain div and the Team label for plain text.
+function useSimpleDialog() {
+  const box = document.createElement("div");
+  box.id = dialog.id;
+  box.hidden = true;
+  box.append(...dialog.childNodes);
+  dialog.replaceWith(box);
+  dialog = box;
+  const label = document.querySelector('label[for="mapping-team"]');
+  const text = document.createElement("span");
+  text.textContent = label.textContent;
+  label.replaceWith(text);
+}

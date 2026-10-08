@@ -9,7 +9,7 @@ variant="$1"; port="$2"
 # Start with the opaque code so `ps` does not show the defect name.
 case "$variant" in
   correct) code=k7;; lost-input) code=q2;; double-action) code=m5;;
-  confusing-status) code=t9;; tablet-layout) code=r4;; *) echo "unknown variant $variant" >&2; exit 1;;
+  confusing-status) code=t9;; tablet-layout) code=r4;; a11y-dialog) code=w6;; *) echo "unknown variant $variant" >&2; exit 1;;
 esac
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 src="$here/../../tests/fixtures/import-app"

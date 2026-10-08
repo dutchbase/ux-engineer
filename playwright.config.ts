@@ -6,6 +6,7 @@ export const importAppPorts = {
   "double-action": 4303,
   "confusing-status": 4304,
   "tablet-layout": 4305,
+  "a11y-dialog": 4306,
 } as const;
 
 export type ImportAppVariant = keyof typeof importAppPorts;
