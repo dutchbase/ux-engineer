@@ -1,6 +1,6 @@
 ---
 name: ux-orchestrator
-description: Route a UX request to the right UX Engineer skill. Use when the user asks for help with the UX of a product, asks "is this good UX", wants to improve the user experience, or asks what UX work a feature needs. Chooses between setup, plan, research, audit, accessibility and verify. Do not use for implementation, non-UI work (database, refactor, tests, build, deploy), or when the user already named a UX skill.
+description: Route a UX request to the right UX Engineer skill. Use when the user asks for general help with UX, asks "is this good UX", wants to improve the user experience, or asks what UX work a feature needs. Chooses between setup, plan, research, audit, accessibility and verify. Do not use for implementation, non-UI work (database, refactor, tests, build, deploy), or when the user already named a UX skill or asks to audit, check or test a named page or flow (use ux-audit).
 license: MIT
 ---
 
@@ -14,8 +14,10 @@ Read `references/writing.md` before writing a message to the user. Read
 
 1. If the user named a skill, use that skill. An explicit choice wins.
 2. Read `docs/ux/project.json` when it exists, and the request. Read nothing
-   else. If the file is missing and the work needs a project profile, the
-   route starts with `ux-setup`.
+   else. A missing file alone is not a reason for `ux-setup`. Route to
+   `ux-setup` first only when the work needs personas or jobs that do not
+   exist, such as `ux-plan` at standard or deep scope. Audit, accessibility,
+   research and a light plan run without the file. They note the gap.
 3. Match the request to a row in `references/routing.md`.
 4. Tell these pairs apart:
    - audit or fix: the plugin audits and plans, and never edits application
