@@ -73,10 +73,14 @@ Write one check in `checks.json` for each `ac_id`. Set `check_id` equal to the
 | `unit` | `false` | `not_run`, `actual_result` "needs unit tests". |
 | `analytics` | `false` | `not_run`, `actual_result` "needs analytics". |
 | `manual` | `false` | `not_run`, unless the user did it and gave the result. |
+| `manual`, result given | `true` | `pass` or `fail` as the user reports. |
 
-For a `manual` criterion the user did, record the result as `pass` or `fail`.
-Add a `note` evidence item with the user's words and the date. If it fails,
-use basis `user_reported` for the finding. Never mark it as observed.
+For a `manual` criterion the user did, set `required: true`, so a failure
+drives `needs_work`. Record the result as `pass` or `fail`. Add a `note`
+evidence item with the user's words and the date. If it fails, use basis
+`user_reported` for the finding. Never mark it as observed. Keep
+`required: false` only for a `manual` criterion that is still `not_run`.
+A check with result `fail` is never `required: false`.
 
 A `not_run` check must not hide a failure. Name it in the summary.
 
@@ -118,7 +122,9 @@ Never write "WCAG compliant" or "accessible".
 
 ## Status
 
-Set `run.requested_checks` to exactly the check IDs in `checks.json`. Derive
+Set `scope` to `targeted`. Add one `coverage` row for each browser criterion:
+`task` is the `ac_id`, plus the `viewport` used, the `state`, and the
+`input_method`. Set `run.requested_checks` to exactly the check IDs in `checks.json`. Derive
 `status` as follows. Do not change it.
 
 - A blocker means `blocked`.
@@ -128,7 +134,9 @@ Set `run.requested_checks` to exactly the check IDs in `checks.json`. Derive
 - Otherwise the status is `passed`.
 
 `passed` means the browser criteria passed. It does not cover the `unit`,
-`analytics`, and `manual` criteria. Say this in `run.limitations`.
+`analytics`, and `manual` criteria. When any check is `not_run`, add this
+line to `run.limitations`, with the real count and `ac_id` list:
+`not verified: <n> criteria need unit tests, analytics or a manual check: <ac_ids>`.
 
 ## Validate and report
 
@@ -144,8 +152,11 @@ Fix the JSON and repeat until validation succeeds. Render only validated JSON.
 If Node is unavailable, check each file against `references/*.schema.json`
 and state that the report was not machine-validated.
 
-Summarize with `references/writing.md`. Give the status first. Then give one
-line for each criterion: `ac_id`, result, and the evidence file. Then list the
+Summarize with `references/writing.md`. Give the status first. When the status
+is `passed` and any check is `not_run`, open with "Passed for browser criteria
+only". Always give one line for each criterion: `ac_id`, result, the evidence
+file, and for a `not_run` check the reason. The report does not show
+`actual_result` for checks, so this summary is where the user sees the reasons. Then list the
 failures, the criteria that did not run and why, and the "noticed, not
 verified" items. Give the run folder and report paths. Keep secrets out of
 artifacts and reports.
