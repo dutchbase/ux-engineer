@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "run_id": "run-001",
+  "checks": [
+    {"check_id": "keyboard", "required": true, "result": "pass", "evidence_ids": ["EV-SCREEN"], "actual_result": "Focus moved through the flow"}
+  ]
+}

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CSV contact importer</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <main>
+      <h1>CSV contact importer</h1>
+      <div id="status" aria-live="polite"></div>
+      <div id="error" role="alert" hidden></div>
+
+      <section id="step-upload">
+        <h2>Upload contacts</h2>
+        <label for="csv-file">CSV file</label>
+        <input id="csv-file" type="file" accept=".csv,text/csv">
+        <label for="csv-text">Paste CSV</label>
+        <textarea id="csv-text" rows="8" spellcheck="false"></textarea>
+        <button id="continue" type="button">Continue</button>
+      </section>
+
+      <section id="step-map" hidden>
+        <h2>Map columns</h2>
+        <div id="mapping-container">
+          <form id="mapping-form">
+            <label for="mapping-name">Name</label>
+            <select id="mapping-name"></select>
+            <label for="mapping-email">Email</label>
+            <select id="mapping-email"></select>
+            <label for="mapping-team">Team</label>
+            <select id="mapping-team"></select>
+          </form>
+          <h3>Preview</h3>
+          <table>
+            <caption>Contact preview</caption>
+            <thead><tr id="preview-head"></tr></thead>
+            <tbody id="preview-body"></tbody>
+          </table>
+          <button id="import" type="button">Import</button>
+        </div>
+      </section>
+
+      <section id="step-processing" hidden>
+        <h2>Importing...</h2>
+      </section>
+
+      <section id="step-result" hidden>
+        <h2 id="result-heading">Import result</h2>
+        <h3>View imported contacts</h3>
+        <ul id="imported-contacts"></ul>
+      </section>
+    </main>
+  </body>
+</html>

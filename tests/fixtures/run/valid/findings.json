@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "run_id": "run-001",
+  "findings": [
+    {
+      "finding_id": "F-001",
+      "flow_id": "checkout",
+      "title": "Checkout entry is visible",
+      "basis": "observed",
+      "status": "confirmed",
+      "severity": "minor",
+      "confidence": "high",
+      "confidence_reason": "Observed in the staging flow",
+      "user_impact": "People can start checkout",
+      "reach": "all shoppers",
+      "context": {"persona_id": "shopper", "locale": "en-US", "viewport": "390x844"},
+      "evidence_ids": ["EV-SCREEN"],
+      "expected_result": "Checkout is easy to find",
+      "actual_result": "Checkout is visible",
+      "criterion_refs": ["checkout-entry"],
+      "recommendation": "Keep the entry point near the cart summary",
+      "requires_human_validation": false,
+      "systemic": false
+    }
+  ]
+}

@@ -4,9 +4,11 @@ This file lists what UX Engineer does not do or cannot guarantee. It is updated 
 
 ## Current status
 
-- Early development. Only the `ux-setup` flow is being built; other skills from the design do not exist yet.
-- `ux-setup` checks `docs/ux/project.json` against the schema by reading it, not with the real validator, because an installed plugin has no Node dependencies. Run `node src/cli.ts validate project <file>` from this repository for a strict check.
-- Tested so far: Claude Code (end to end, one eval case) and Codex (skill discovery only). See `compatibility.json`.
+- Early development. `ux-setup` and `ux-audit` exist. The other skills from the design do not exist yet.
+- The skills validate their output with the bundled `scripts/ux.mjs`, which needs Node 18 or newer. Without Node, they fall back to a reading check and say that the output was not machine-validated.
+- Browser audits cannot run inside `claude plugin eval` on Linux: its shell sandbox blocks the sockets Chromium needs, and the agent correctly reports the run as `blocked`. Browser audit cases are run with `evals/_shared/run-audit-local.sh` instead, outside that sandbox.
+- Tested so far: Claude Code (setup and audit, see `compatibility.json`) and Codex (skill discovery only). Each case ran only a few times; this is not a benchmark.
+- The test app's `correct` variant is the reference for the four planted defects, not a defect-free app. Audits found real extra problems in it; they are listed in `evals/ground-truth/import-app.json` and in the test app's README.
 - Nothing has been benchmarked yet. There is no evidence yet that the plugin improves on using no plugin or an existing alternative.
 
 ## By design

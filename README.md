@@ -3,7 +3,7 @@
 A plugin for Claude Code, Codex, OpenCode and Claude desktop that makes coding agents design for real people before they build a UI.
 
 > [!IMPORTANT]
-> Early development. The first command, `ux-setup`, works but is experimental. Everything else in this README is planned. The full design is in [`docs/design.md`](docs/design.md), and known gaps are in [`docs/limitations.md`](docs/limitations.md).
+> Early development. Two commands work but are experimental: `ux-setup` and `ux-audit`. Everything else in this README is planned. The full design is in [`docs/design.md`](docs/design.md), and known gaps are in [`docs/limitations.md`](docs/limitations.md).
 
 ## Install
 
@@ -24,7 +24,10 @@ codex plugin marketplace add dutchbase/ux-engineer
 
 Then install UX Engineer from the `/plugins` list.
 
-Then run `/ux-engineer:ux-setup` (Claude) or `$ux-setup` (Codex) in your project. It interviews you about your users and writes `docs/ux/project.json`. For a long interview, install [Brainstormform](https://github.com/dutchbase/Brainstormform) first; without it, the plugin asks its questions in the chat.
+Then, in your project:
+
+- `/ux-engineer:ux-setup` (Claude) or `$ux-setup` (Codex) interviews you about your users and writes `docs/ux/project.json`. For a long interview, install [Brainstormform](https://github.com/dutchbase/Brainstormform) first; without it, the plugin asks its questions in the chat.
+- `/ux-engineer:ux-audit` or `$ux-audit` walks through a task in your running app (local, staging or preview) in a real browser, at phone, tablet, laptop and wide-screen sizes. It writes findings with screenshots as evidence and a Markdown and HTML report to `.ux/runs/`. It uses your agent's browser tool, or the [Playwright CLI](https://github.com/microsoft/playwright-cli) if there is none, and it needs Node 18 or newer.
 
 ## Why
 
@@ -84,7 +87,7 @@ One repository, one copy of each skill, thin adapters per host. Details are in [
     findings with evidence, report in Markdown and HTML
 ```
 
-Only `ux-setup` exists today. The other commands show the intended shape.
+`ux-setup` and `ux-audit` exist today. `ux-plan` shows the intended shape.
 
 ## Roadmap
 

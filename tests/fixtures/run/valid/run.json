@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "run_id": "run-001",
+  "mode": "audit",
+  "scope": "standard",
+  "target": {"url": "https://example.test", "environment": "staging", "description": "Checkout flow"},
+  "versions": {"app_commit": "abc123", "plugin_version": "0.1.0", "host": "codex", "model": "gpt", "browser": "chromium"},
+  "capabilities": {"browser": true, "keyboard": true, "screenshots": true, "axe": false},
+  "coverage": [
+    {"task": "Complete checkout", "persona_id": "shopper", "viewport": "390x844", "state": "empty cart", "input_method": "pointer", "locale": "en-US", "tested": true, "reason": null},
+    {"task": "Recover from a payment error", "persona_id": "shopper", "viewport": "390x844", "state": "payment error", "input_method": "keyboard", "locale": "en-US", "tested": false, "reason": "Test account unavailable"}
+  ],
+  "requested_checks": ["keyboard"],
+  "status": "passed",
+  "blockers": [],
+  "limitations": ["No screen reader check"],
+  "started_at": "2026-10-08T10:00:00Z",
+  "finished_at": "2026-10-08T10:05:00Z"
+}

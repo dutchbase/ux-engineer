@@ -43,8 +43,7 @@ pointer line in `AGENTS.md`; apply it only after the user says yes.
 6. Build personas with `ux-framing`. Mark every persona without user data as
    `proto: true` and label it to the user as a `proto-persona`.
 7. Write the canonical JSON and generate the Markdown view.
-8. Validate the JSON against `references/project.schema.json` and run the
-   semantic self-check below.
+8. Validate with `node <absolute path to this skill folder>/scripts/ux.mjs validate project docs/ux/project.json` from the target project; fix and repeat until it prints `valid`. If Node is not available, do the reading self-check against `references/project.schema.json` and the semantic rules and tell the user the file was not machine-validated.
 9. Show this proposed diff for `AGENTS.md`:
 
    ```diff

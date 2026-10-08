@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dutchbase/ux-engineer/schemas/evidence.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "items"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run_id": {"type": "string"},
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["evidence_id", "type", "producer", "timestamp", "context", "action", "result", "file", "sha256"],
+        "properties": {
+          "evidence_id": {"type": "string", "pattern": "^EV-[A-Z0-9-]+$"},
+          "type": {"enum": ["screenshot", "action_log", "console_log", "network_log", "dom_snapshot", "axe_result", "note"]},
+          "producer": {"type": "string"},
+          "timestamp": {"type": "string", "format": "date-time"},
+          "context": {
+            "type": "object", "additionalProperties": false,
+            "required": ["persona_id", "viewport", "locale", "url", "step"],
+            "properties": {"persona_id": {"type": ["string", "null"]}, "viewport": {"type": ["string", "null"]}, "locale": {"type": ["string", "null"]}, "url": {"type": ["string", "null"]}, "step": {"type": ["string", "null"]}}
+          },
+          "action": {"type": ["string", "null"]},
+          "result": {"type": ["string", "null"]},
+          "file": {"type": ["string", "null"]},
+          "sha256": {"type": ["string", "null"], "pattern": "^[a-fA-F0-9]{64}$"}
+        }
+      }
+    }
+  }
+}

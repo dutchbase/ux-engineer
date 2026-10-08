@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "run_id": "run-001",
+  "items": [
+    {
+      "evidence_id": "EV-SCREEN",
+      "type": "note",
+      "producer": "test",
+      "timestamp": "2026-10-08T10:02:00Z",
+      "context": {"persona_id": "shopper", "viewport": "390x844", "locale": "en-US", "url": "https://example.test", "step": "cart"},
+      "action": "Opened checkout",
+      "result": "Checkout was visible",
+      "file": "artifacts/screen.txt",
+      "sha256": "c044f5bb9d354cff481e5c373e1e9a861206dce437f92651d2cdf353482bbbae"
+    }
+  ]
+}

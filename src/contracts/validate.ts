@@ -1,10 +1,14 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import Ajv from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import type { ValidateFunction } from "ajv";
+import projectSchema from "../../schemas/project.schema.json" with { type: "json" };
+import checksSchema from "../../schemas/checks.schema.json" with { type: "json" };
+import runSchema from "../../schemas/run.schema.json" with { type: "json" };
+import evidenceSchema from "../../schemas/evidence.schema.json" with { type: "json" };
+import findingsSchema from "../../schemas/findings.schema.json" with { type: "json" };
+import type { Evidence, Findings, Run } from "./run.ts";
 
-export type Kind = "project" | "checks";
+export type Kind = "project" | "checks" | "run" | "evidence" | "findings";
 export type ValidationError = { path: string; message: string };
 export type Result<T> = { ok: true; data: T } | { ok: false; errors: ValidationError[] };
 
@@ -44,12 +48,12 @@ type AjvConstructor = new (options: { allErrors: boolean }) => AjvInstance;
 const ajv = new (Ajv as unknown as AjvConstructor)({ allErrors: true });
 (addFormats as unknown as (instance: AjvInstance) => void)(ajv);
 
-const schema = (kind: Kind): object =>
-  JSON.parse(readFileSync(join(import.meta.dirname, "../../schemas", `${kind}.schema.json`), "utf8")) as object;
-
 const validators: Record<Kind, ValidateFunction> = {
-  project: ajv.compile(schema("project")),
-  checks: ajv.compile(schema("checks"))
+  project: ajv.compile(projectSchema),
+  checks: ajv.compile(checksSchema),
+  run: ajv.compile(runSchema),
+  evidence: ajv.compile(evidenceSchema),
+  findings: ajv.compile(findingsSchema)
 };
 
 const jsonPath = (path: string): string => path || "/";
@@ -129,6 +133,42 @@ function checksSemanticErrors(checks: Checks): ValidationError[] {
   );
 }
 
+function evidenceSemanticErrors(evidence: Evidence): ValidationError[] {
+  const errors: ValidationError[] = [];
+  evidence.items.forEach((item, index) => {
+    if ((item.file === null) !== (item.sha256 === null)) {
+      errors.push({path: `/items/${index}/file`, message: "file and sha256 must both be null or both be set"});
+    }
+    if (item.file !== null && (
+      item.file.startsWith("/") || /^[A-Za-z]:[\\/]/.test(item.file) ||
+      item.file.includes("\\") || item.file.split("/").includes("..") ||
+      !item.file.startsWith("artifacts/") || item.file === "artifacts/"
+    )) {
+      errors.push({path: `/items/${index}/file`, message: "file must be a relative path under artifacts/ without .. or backslashes"});
+    }
+  });
+  return errors;
+}
+
+function findingsSemanticErrors(findings: Findings): ValidationError[] {
+  const errors: ValidationError[] = [];
+  findings.findings.forEach((finding, index) => {
+    if (finding.status === "confirmed" && !["observed", "measured", "code_supported", "user_reported"].includes(finding.basis)) {
+      errors.push({path: `/findings/${index}/basis`, message: "confirmed finding requires observed, measured, code_supported, or user_reported basis"});
+    }
+    if (finding.status === "confirmed" && finding.evidence_ids.length === 0) {
+      errors.push({path: `/findings/${index}/evidence_ids`, message: "confirmed finding requires at least one evidence id"});
+    }
+    if (finding.basis === "observed" && finding.evidence_ids.length === 0) {
+      errors.push({path: `/findings/${index}/evidence_ids`, message: "observed finding requires at least one evidence id"});
+    }
+    if (finding.severity === "advisory" && finding.status === "confirmed") {
+      errors.push({path: `/findings/${index}/status`, message: "advisory finding cannot be confirmed"});
+    }
+  });
+  return errors;
+}
+
 export function validateArtifact(kind: Kind, input: unknown): Result<unknown> {
   if (
     typeof input === "object" &&
@@ -144,6 +184,12 @@ export function validateArtifact(kind: Kind, input: unknown): Result<unknown> {
 
   const errors = kind === "project"
     ? projectSemanticErrors(input as Project)
-    : checksSemanticErrors(input as Checks);
+    : kind === "checks"
+      ? checksSemanticErrors(input as Checks)
+      : kind === "evidence"
+        ? evidenceSemanticErrors(input as Evidence)
+        : kind === "findings"
+          ? findingsSemanticErrors(input as Findings)
+          : [];
   return errors.length > 0 ? {ok: false, errors} : {ok: true, data: input};
 }

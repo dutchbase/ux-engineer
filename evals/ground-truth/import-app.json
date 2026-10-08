@@ -1,0 +1,71 @@
+{
+  "app": "import-app",
+  "variants": {
+    "correct": {
+      "defects": []
+    },
+    "lost-input": {
+      "defects": [
+        {
+          "id": "lost-input-on-error",
+          "title": "Import error loses entered data and mapping",
+          "severity": "high",
+          "observe": "After the temporary import error, the app returns to Upload contacts and the pasted CSV and column mapping are gone."
+        }
+      ]
+    },
+    "double-action": {
+      "defects": [
+        {
+          "id": "double-import-on-rapid-click",
+          "title": "Import allows duplicate jobs from a double click",
+          "severity": "high",
+          "observe": "A rapid double click creates two jobs and the result says 22 contacts imported instead of 11."
+        }
+      ]
+    },
+    "confusing-status": {
+      "defects": [
+        {
+          "id": "premature-import-complete",
+          "title": "Completion status appears while the import is processing",
+          "severity": "medium",
+          "observe": "The page says Import complete immediately after accepting the job, while the job is still processing."
+        }
+      ]
+    },
+    "tablet-layout": {
+      "defects": [
+        {
+          "id": "tablet-import-clipped",
+          "title": "Import action is clipped at tablet widths",
+          "severity": "high",
+          "observe": "At a viewport from 768 to 1024 pixels wide, the mapping container clips the Import button so it cannot be reached."
+        }
+      ]
+    }
+  },
+  "known_issues_all_variants": [
+    {
+      "id": "preview-ignores-mapping",
+      "severity": "major",
+      "observe": "The preview shows CSV columns in file order and ignores the chosen mapping, so a wrong mapping imports wrong data without warning."
+    },
+    {
+      "id": "error-off-screen-mobile",
+      "severity": "major",
+      "observe": "At 390x844 the import error appears at the top of the page, above the visible area, while the user is at the Import button."
+    },
+    {
+      "id": "focus-lost-after-step",
+      "severity": "minor",
+      "observe": "Keyboard focus returns to the start of the page after Continue and Import."
+    },
+    {
+      "id": "no-next-step-on-result",
+      "severity": "minor",
+      "observe": "The result step has no way to start over."
+    }
+  ],
+  "note": "Known issues were found by ux-audit runs on 2026-10-08 and confirmed by reading the code. They are not planted defects: graders must not count them as false positives."
+}

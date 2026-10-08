@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dutchbase/ux-engineer/schemas/run.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "mode", "scope", "target", "versions", "capabilities", "coverage", "requested_checks", "status", "blockers", "limitations", "started_at", "finished_at"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run_id": {"type": "string"},
+    "mode": {"enum": ["setup", "plan", "research", "audit", "verify"]},
+    "scope": {"enum": ["light", "targeted", "standard", "deep"]},
+    "target": {
+      "type": "object", "additionalProperties": false,
+      "required": ["url", "environment", "description"],
+      "properties": {"url": {"type": "string"}, "environment": {"enum": ["local", "staging", "preview", "production"]}, "description": {"type": "string"}}
+    },
+    "versions": {
+      "type": "object", "additionalProperties": false,
+      "required": ["app_commit", "plugin_version", "host", "model", "browser"],
+      "properties": {"app_commit": {"type": ["string", "null"]}, "plugin_version": {"type": ["string", "null"]}, "host": {"type": ["string", "null"]}, "model": {"type": ["string", "null"]}, "browser": {"type": ["string", "null"]}}
+    },
+    "capabilities": {
+      "type": "object", "additionalProperties": false,
+      "required": ["browser", "keyboard", "screenshots", "axe"],
+      "properties": {"browser": {"type": "boolean"}, "keyboard": {"type": "boolean"}, "screenshots": {"type": "boolean"}, "axe": {"type": "boolean"}}
+    },
+    "coverage": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["task", "persona_id", "viewport", "state", "input_method", "locale", "tested", "reason"],
+        "properties": {
+          "task": {"type": "string"}, "persona_id": {"type": ["string", "null"]}, "viewport": {"type": "string", "pattern": "^[1-9][0-9]*x[1-9][0-9]*$"}, "state": {"type": "string"}, "input_method": {"enum": ["pointer", "touch", "keyboard"]}, "locale": {"type": ["string", "null"]}, "tested": {"type": "boolean"}, "reason": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "requested_checks": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "status": {"enum": ["passed", "needs_work", "incomplete", "blocked"]},
+    "blockers": {"type": "array", "items": {"type": "string"}},
+    "limitations": {"type": "array", "items": {"type": "string"}},
+    "started_at": {"type": "string", "format": "date-time"},
+    "finished_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

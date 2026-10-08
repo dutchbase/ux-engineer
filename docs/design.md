@@ -615,7 +615,7 @@ Additional cases for the new features:
 | 21 Request that would need app code | Hands off; never edits app code |
 | 22 Layout breaks only on tablet | All default viewports checked |
 
-Ground truth stays outside the agent's context. A separate evaluator checks the results. Scenarios about human perception get real, consented input or stay explicit hypotheses.
+Ground truth stays outside the agent's context. A separate evaluator checks the results. Browser audit cases run with `evals/_shared/run-audit-local.sh`, because the shell sandbox of `claude plugin eval` blocks the sockets Chromium needs; the test app runs from a temporary copy so the agent cannot reach the ground truth. Real problems that the audits found in the test app itself, beyond the planted defects, are recorded as `known_issues_all_variants` in the ground truth and are not counted as false positives. Scenarios about human perception get real, consented input or stay explicit hypotheses.
 
 ## 12.3 Metrics
 

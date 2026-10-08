@@ -6,7 +6,7 @@
     {
       "name": "ux-engineer",
       "description": "Makes coding agents design for real users: personas first, evidence before claims, no generic AI UI.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./",
       "author": { "name": "dutchbase", "url": "https://github.com/dutchbase" }
     }

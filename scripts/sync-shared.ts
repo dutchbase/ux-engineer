@@ -2,11 +2,26 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 
 const sharedFiles = {
-  "ux-framing": ["shared/policies/writing.md", "schemas/project.schema.json"],
+  "ux-framing": [
+    {source: "shared/policies/writing.md", folder: "references"},
+    {source: "schemas/project.schema.json", folder: "references"}
+  ],
   "ux-setup": [
-    "shared/policies/writing.md",
-    "schemas/project.schema.json",
-    "shared/references/interview.json"
+    {source: "shared/policies/writing.md", folder: "references"},
+    {source: "schemas/project.schema.json", folder: "references"},
+    {source: "shared/references/interview.json", folder: "references"},
+    {source: "dist/ux.mjs", folder: "scripts"}
+  ],
+  "ux-audit": [
+    {source: "shared/policies/writing.md", folder: "references"},
+    {source: "shared/policies/evidence.md", folder: "references"},
+    {source: "shared/policies/safety.md", folder: "references"},
+    {source: "shared/references/audit-method.md", folder: "references"},
+    {source: "schemas/run.schema.json", folder: "references"},
+    {source: "schemas/evidence.schema.json", folder: "references"},
+    {source: "schemas/findings.schema.json", folder: "references"},
+    {source: "schemas/checks.schema.json", folder: "references"},
+    {source: "dist/ux.mjs", folder: "scripts"}
   ]
 } as const;
 
@@ -14,8 +29,11 @@ export function syncShared(root: string, opts: {check: boolean}): string[] {
   const outOfDate: string[] = [];
 
   for (const [skill, sources] of Object.entries(sharedFiles)) {
-    for (const source of sources) {
-      const destination = `skills/${skill}/references/${basename(source)}`;
+    for (const {source, folder} of sources) {
+      if (source === "dist/ux.mjs" && !existsSync(resolve(root, source))) {
+        throw new Error("dist/ux.mjs missing: run pnpm build first");
+      }
+      const destination = `skills/${skill}/${folder}/${basename(source)}`;
       const sourceBytes = readFileSync(resolve(root, source));
       const destinationPath = resolve(root, destination);
       const currentBytes = existsSync(destinationPath) ? readFileSync(destinationPath) : null;
@@ -35,7 +53,12 @@ export function syncShared(root: string, opts: {check: boolean}): string[] {
 if (process.argv[1] && import.meta.filename === resolve(process.argv[1])) {
   const check = process.argv[2] === "--check";
   const root = resolve(import.meta.dirname, "..");
-  const updated = syncShared(root, {check});
-  updated.forEach((path) => console.log(path));
-  if (check && updated.length > 0) process.exitCode = 1;
+  try {
+    const updated = syncShared(root, {check});
+    updated.forEach((path) => console.log(path));
+    if (check && updated.length > 0) process.exitCode = 1;
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : error);
+    process.exitCode = 1;
+  }
 }
