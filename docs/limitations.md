@@ -31,7 +31,7 @@ This file lists what UX Engineer does not do or cannot guarantee. It is updated 
 - Only a project install for all three hosts was run on real hosts; `--global`, `--force` and `--skills` are covered by unit tests only.
 - A second `--force` on the same file makes a second backup, but `uninstall` restores only the first (oldest) backup.
 - A `.claude/skills` folder that is a symlink pointing inside the project is followed, and the skills are written there.
-- OpenCode discovery was tested only with both `.claude/skills` and `.agents/skills` present.
+- OpenCode discovery was tested with both folders present and with `.agents/skills` alone (`--host opencode`); both found all skills.
 - Tested on Linux (x86_64) only. Windows and macOS are untested.
 
 ## By design
@@ -47,3 +47,5 @@ The review of other projects in `docs/design.md` §2 is not a full license or se
 
 - The AI-tells blocklist reflects writing up to October 2026. Two entries rest on a single source; some "why it hurts" lines are reasoning, not measured effects. Audits must confirm a harm in the product before rating it above `advisory`.
 - LLM-graded eval cases are noisy with the default judge model; use `--judge-model sonnet`.
+- If the installer is killed in the middle of a write, a temporary file `<file>.ux-engineer-tmp-<pid>` can stay in a skill folder. Uninstall does not remove it; delete it by hand. Hosts do not load it, but `doctor` reports that skill as different from the package.
+- New files are created with a hard link from a temporary file, so the installer needs a filesystem with hard links (not FAT or exFAT).
