@@ -64,7 +64,9 @@ Use `forms.md` for labels, validation, input retention, duplicate submits, and
 risky actions. Use `information-architecture.md` for labels, grouping, and
 findability. Use `content-design.md` for copy. Express accessibility as
 observable acceptance criteria with WCAG 2.2 references at the project target.
-Take the criteria from `references/accessibility.md`.
+Take the criteria from `references/accessibility.md`. For dialogs, forms and
+custom widgets, use the `ux-accessibility` skill (design mode) for the
+acceptance criteria.
 
 Check every proposed screen and copy choice against `references/ai-tells.md`.
 Never propose a blocked AI tell. If the user asks for one, warn once in one

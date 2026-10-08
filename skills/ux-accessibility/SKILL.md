@@ -1,6 +1,6 @@
 ---
 name: ux-accessibility
-description: Turn accessibility needs into acceptance criteria or check them in a browser against WCAG 2.2. Use when ux-plan or ux-flow-design invokes it, or when the user asks for an accessibility check, a keyboard test, a focus check, a contrast or reflow check, or an axe scan. Do not use for fixing code, visual taste, or a general UX audit.
+description: Turn accessibility needs into acceptance criteria or check them in a browser against WCAG 2.2. Use when the user or another skill asks for accessibility criteria, an accessibility check, a keyboard test, a focus check, a contrast or reflow check, or an axe scan. Do not use for fixing code, visual taste, or a general UX audit.
 license: MIT
 ---
 
@@ -33,8 +33,8 @@ Target level: the `accessibility` target in `docs/ux/project.json`, else WCAG
 
 ## Design mode
 
-Use this mode when `ux-plan` or `ux-flow-design` calls you, or when the user
-asks for criteria before build.
+Use this mode when the user or another skill asks for accessibility criteria,
+or when the user asks for criteria before build.
 
 1. Read `docs/ux/project.json` and the flow file, if they exist.
 2. Take the flow's steps, states, forms, dialogs, and error states.
@@ -128,6 +128,10 @@ needs it. Record these checks:
    playwright-cli run-code 'async page => { await page.addScriptTag({ url: "https://cdn.jsdelivr.net/npm/axe-core@4.14.0/axe.min.js" }); return await page.evaluate(() => axe.version); }'
    playwright-cli eval "async () => await axe.run()" --raw > artifacts/axe-<state>.json
    ```
+
+   If the script does not load (CSP, no network, blocked CDN), record the axe
+   check as `not_run` with the reason. Do not change CSP, headers or page code
+   to make it load.
 
    The first command should print `"4.14.0"`. The second saves the full JSON
    result. Hash the file and record it as an `axe_result` evidence item with the

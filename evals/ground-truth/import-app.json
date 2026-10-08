@@ -65,6 +65,11 @@
   },
   "known_issues_all_variants": [
     {
+      "id": "focus-lost-after-discard",
+      "severity": "minor",
+      "observe": "After Discard in the Cancel dialog, focus drops to the page body because the Cancel button is hidden."
+    },
+    {
       "id": "preview-ignores-mapping",
       "severity": "major",
       "observe": "The preview shows CSV columns in file order and ignores the chosen mapping, so a wrong mapping imports wrong data without warning."
