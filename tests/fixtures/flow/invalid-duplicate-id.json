@@ -1,0 +1,547 @@
+{
+  "schema_version": "1.0",
+  "flow_id": "csv-contact-import",
+  "name": "Import contacts from a CSV file",
+  "product_id": "northwind-crm",
+  "persona_ids": [
+    "sales-admin"
+  ],
+  "goal": "A sales admin moves a list of contacts from a spreadsheet into the CRM in one session and sees how many contacts arrived.",
+  "scope": "standard",
+  "design_system_ref": null,
+  "entry_points": [
+    {
+      "from": "Contacts page, button \"Import contacts\"",
+      "context": "The admin has a CSV export from the old spreadsheet."
+    },
+    {
+      "from": "Empty contacts list, link \"Import from a file\"",
+      "context": "First use, the list has no contacts."
+    }
+  ],
+  "prerequisites": [
+    "The user is signed in with the Admin role.",
+    "The file is a CSV with a header row and at most 5,000 rows."
+  ],
+  "steps": [
+    {
+      "step_id": "upload",
+      "title": "Choose a file",
+      "user_intent": "Give the CRM the CSV file with my contacts.",
+      "screen": "Import: step 1 of 4, file upload",
+      "information_needed": [
+        "Accepted format and size limit",
+        "A sample file to check the layout"
+      ],
+      "actions": [
+        {
+          "action_id": "choose-file",
+          "label": "Choose a CSV file",
+          "kind": "primary",
+          "leads_to": "map-columns"
+        },
+        {
+          "action_id": "cancel-upload",
+          "label": "Cancel",
+          "kind": "navigation",
+          "leads_to": "import-abandoned"
+        }
+      ],
+      "copy": [
+        {
+          "key": "upload.title",
+          "text": "Import contacts"
+        },
+        {
+          "key": "upload.hint",
+          "text": "Choose a CSV file with a header row. The maximum is 5,000 rows."
+        },
+        {
+          "key": "upload.sample",
+          "text": "Download a sample file"
+        }
+      ]
+    },
+    {
+      "step_id": "map-columns",
+      "title": "Match columns",
+      "user_intent": "Tell the CRM which column holds the name, the email address and the company.",
+      "screen": "Import: step 2 of 4, column mapping",
+      "information_needed": [
+        "First three values of each column",
+        "Which CRM fields are required"
+      ],
+      "actions": [
+        {
+          "action_id": "confirm-mapping",
+          "label": "Continue",
+          "kind": "primary",
+          "leads_to": "preview"
+        },
+        {
+          "action_id": "back-to-upload",
+          "label": "Choose another file",
+          "kind": "secondary",
+          "leads_to": "upload"
+        }
+      ],
+      "copy": [
+        {
+          "key": "map.title",
+          "text": "Match your columns to contact fields"
+        },
+        {
+          "key": "map.required",
+          "text": "Email address is required."
+        },
+        {
+          "key": "map.skip",
+          "text": "Do not import this column"
+        }
+      ]
+    },
+    {
+      "step_id": "preview",
+      "title": "Check a preview",
+      "user_intent": "See what the first contacts look like before I import all of them.",
+      "screen": "Import: step 3 of 4, preview of the first 5 rows",
+      "information_needed": [
+        "Total number of rows",
+        "Number of rows with a problem"
+      ],
+      "actions": [
+        {
+          "action_id": "go-to-import",
+          "label": "Continue",
+          "kind": "primary",
+          "leads_to": "import"
+        },
+        {
+          "action_id": "back-to-mapping",
+          "label": "Change column match",
+          "kind": "secondary",
+          "leads_to": "map-columns"
+        }
+      ],
+      "copy": [
+        {
+          "key": "preview.title",
+          "text": "Check your contacts"
+        },
+        {
+          "key": "preview.summary",
+          "text": "248 contacts are ready. 3 rows have a problem and will be skipped."
+        }
+      ]
+    },
+    {
+      "step_id": "import",
+      "title": "Confirm the import",
+      "user_intent": "Start the import when I am sure the data is right.",
+      "screen": "Import: step 4 of 4, confirmation",
+      "information_needed": [
+        "How many contacts will be added",
+        "That existing contacts with the same email address are updated"
+      ],
+      "actions": [
+        {
+          "action_id": "start-import",
+          "label": "Import 248 contacts",
+          "kind": "primary",
+          "leads_to": "processing"
+        },
+        {
+          "action_id": "back-to-preview",
+          "label": "Back to preview",
+          "kind": "secondary",
+          "leads_to": "preview"
+        },
+        {
+          "action_id": "cancel-import",
+          "label": "Cancel import",
+          "kind": "destructive",
+          "leads_to": "import-abandoned"
+        }
+      ],
+      "copy": [
+        {
+          "key": "import.title",
+          "text": "Ready to import"
+        },
+        {
+          "key": "import.warning",
+          "text": "Contacts with an email address that is already in the CRM are updated."
+        }
+      ]
+    },
+    {
+      "step_id": "processing",
+      "title": "Import in progress",
+      "user_intent": "Know that the import works and how long it takes.",
+      "screen": "Import: progress with a count",
+      "information_needed": [
+        "Progress as a count of contacts",
+        "That I can leave this page"
+      ],
+      "actions": [
+        {
+          "action_id": "leave-processing",
+          "label": "Continue working",
+          "kind": "navigation",
+          "leads_to": "result"
+        }
+      ],
+      "copy": [
+        {
+          "key": "processing.title",
+          "text": "Importing your contacts"
+        },
+        {
+          "key": "processing.progress",
+          "text": "120 of 248 contacts imported"
+        }
+      ]
+    },
+    {
+      "step_id": "result",
+      "title": "See the result",
+      "user_intent": "Know what was imported and what was not.",
+      "screen": "Import: result summary",
+      "information_needed": [
+        "Number of contacts added, updated and skipped",
+        "Why rows were skipped"
+      ],
+      "actions": [
+        {
+          "action_id": "open-contacts",
+          "label": "Go to contacts",
+          "kind": "primary",
+          "leads_to": "import-success"
+        },
+        {
+          "action_id": "download-errors",
+          "label": "Download skipped rows",
+          "kind": "secondary",
+          "leads_to": "partial-result"
+        }
+      ],
+      "copy": [
+        {
+          "key": "result.title",
+          "text": "Import finished"
+        },
+        {
+          "key": "result.summary",
+          "text": "245 contacts added, 3 skipped."
+        }
+      ]
+    }
+  ],
+  "states": [
+    {
+      "state_id": "upload",
+      "step_id": "upload",
+      "kind": "first_use",
+      "trigger": "The contacts list is empty and the admin opens the import for the first time.",
+      "visible_feedback": "A short text explains the CSV layout and offers the sample file.",
+      "available_actions": [
+        "Choose a CSV file",
+        "Download a sample file"
+      ],
+      "next": "upload",
+      "copy": [
+        {
+          "key": "first-use.body",
+          "text": "No contacts yet. Import a CSV file to get started."
+        }
+      ]
+    },
+    {
+      "state_id": "invalid-file",
+      "step_id": "upload",
+      "kind": "invalid_input",
+      "trigger": "The file is not a CSV, is empty or has more than 5,000 rows.",
+      "visible_feedback": "An error message under the upload area names the problem and the fix. The page keeps its place.",
+      "available_actions": [
+        "Choose another file",
+        "Download a sample file"
+      ],
+      "next": "upload",
+      "copy": [
+        {
+          "key": "invalid-file.type",
+          "text": "This file is not a CSV. Save it as CSV from your spreadsheet and try again."
+        },
+        {
+          "key": "invalid-file.size",
+          "text": "This file has 6,200 rows. The maximum is 5,000. Split the file and import it in parts."
+        }
+      ]
+    },
+    {
+      "state_id": "missing-required-column",
+      "step_id": "map-columns",
+      "kind": "invalid_input",
+      "trigger": "The admin continues without a column for the email address.",
+      "visible_feedback": "The email address row gets an error text and focus. Other choices stay as they are.",
+      "available_actions": [
+        "Pick a column for email address"
+      ],
+      "next": "map-columns",
+      "copy": [
+        {
+          "key": "missing-required-column.error",
+          "text": "Choose the column that holds the email address."
+        }
+      ]
+    },
+    {
+      "state_id": "network-error",
+      "step_id": "import",
+      "kind": "network_error",
+      "trigger": "The import request fails because the connection drops or the server does not answer.",
+      "visible_feedback": "A message appears above the button. The column match and the preview stay as the admin left them.",
+      "available_actions": [
+        "Retry",
+        "Back to preview"
+      ],
+      "next": null,
+      "copy": [
+        {
+          "key": "network-error.body",
+          "text": "The import did not start. Your column match is saved. Check your connection and try again."
+        },
+        {
+          "key": "network-error.retry",
+          "text": "Retry"
+        }
+      ]
+    },
+    {
+      "state_id": "double-click-import",
+      "step_id": "import",
+      "kind": "double_action",
+      "trigger": "The admin presses \"Import 248 contacts\" twice or presses Enter again.",
+      "visible_feedback": "The button is disabled after the first press and shows a busy label. Only one import starts.",
+      "available_actions": [],
+      "next": "processing",
+      "copy": [
+        {
+          "key": "double-click-import.busy",
+          "text": "Starting import…"
+        }
+      ]
+    },
+    {
+      "state_id": "long-running-import",
+      "step_id": "processing",
+      "kind": "long_running",
+      "trigger": "The import takes longer than 10 seconds.",
+      "visible_feedback": "The progress count keeps updating. A note says the admin can leave the page and an email follows.",
+      "available_actions": [
+        "Continue working"
+      ],
+      "next": "result",
+      "copy": [
+        {
+          "key": "long-running-import.note",
+          "text": "Large files take a few minutes. You can leave this page. We email you when the import is done."
+        }
+      ]
+    },
+    {
+      "state_id": "partial-result",
+      "step_id": "result",
+      "kind": "partial_result",
+      "trigger": "Some rows fail validation, for example an email address without an @ sign.",
+      "visible_feedback": "The summary shows added, updated and skipped counts. A link downloads the skipped rows with a reason for each.",
+      "available_actions": [
+        "Download skipped rows",
+        "Go to contacts"
+      ],
+      "next": "import-success",
+      "copy": [
+        {
+          "key": "partial-result.body",
+          "text": "245 contacts added, 3 skipped. Download the skipped rows to see what to fix."
+        }
+      ]
+    },
+    {
+      "state_id": "session-expired",
+      "step_id": "import",
+      "kind": "session_expired",
+      "trigger": "The session ends while the admin reviews the preview.",
+      "visible_feedback": "A sign-in dialog opens. After sign-in the admin returns to the confirmation step with the column match kept.",
+      "available_actions": [
+        "Sign in again"
+      ],
+      "next": "import",
+      "copy": [
+        {
+          "key": "session-expired.body",
+          "text": "You were signed out. Sign in again to continue. Your import settings are saved."
+        }
+      ]
+    },
+    {
+      "state_id": "import-success",
+      "step_id": "result",
+      "kind": "success",
+      "trigger": "All valid rows are stored.",
+      "visible_feedback": "A confirmation with the counts and a link to the contacts list. The new contacts show in the list.",
+      "available_actions": [
+        "Go to contacts"
+      ],
+      "next": null,
+      "copy": [
+        {
+          "key": "import-success.body",
+          "text": "Done. 248 contacts are now in your CRM."
+        }
+      ]
+    },
+    {
+      "state_id": "import-abandoned",
+      "step_id": null,
+      "kind": "cancel",
+      "trigger": "The admin cancels before the import starts.",
+      "visible_feedback": "The admin returns to the contacts page. No contacts are added. The uploaded file is deleted.",
+      "available_actions": [],
+      "next": null,
+      "copy": [
+        {
+          "key": "import-abandoned.toast",
+          "text": "Import cancelled. No contacts were added."
+        }
+      ]
+    }
+  ],
+  "terminal_states": [
+    {
+      "state_id": "import-success",
+      "outcome": "success",
+      "observable_result": "The contacts list shows the imported contacts and the result page shows the counts."
+    },
+    {
+      "state_id": "import-abandoned",
+      "outcome": "abandoned",
+      "observable_result": "The contacts list is unchanged and the uploaded file is gone."
+    }
+  ],
+  "risks": [
+    {
+      "risk_id": "duplicate-contacts",
+      "description": "Rows with an existing email address could create duplicates.",
+      "mitigation": "Match on email address and update the existing contact. State this on the confirmation step."
+    },
+    {
+      "risk_id": "wrong-column-match",
+      "description": "The admin maps the wrong column and imports bad data.",
+      "mitigation": "Show three sample values per column and a preview of the first five rows before the import."
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "ac_id": "AC-UPLOAD-TYPE",
+      "given": "The admin is on the upload step",
+      "when": "they choose a file that is not a CSV",
+      "then": "an error under the upload area names the problem and the fix, and the admin can choose another file without reloading",
+      "verify_with": "browser",
+      "wcag_refs": [
+        "WCAG 2.2 SC 3.3.1",
+        "WCAG 2.2 SC 3.3.3"
+      ]
+    },
+    {
+      "ac_id": "AC-MAP-REQUIRED",
+      "given": "The admin is on the column match step",
+      "when": "they press Continue without a column for the email address",
+      "then": "focus moves to the email address row, its error text is read by a screen reader, and the other choices stay set",
+      "verify_with": "browser",
+      "wcag_refs": [
+        "WCAG 2.2 SC 3.3.1",
+        "WCAG 2.2 SC 4.1.3"
+      ]
+    },
+    {
+      "ac_id": "AC-NETWORK-RETRY",
+      "given": "The admin pressed \"Import 248 contacts\" and the network is down",
+      "when": "the request fails",
+      "then": "an error message with a Retry button shows, the column match is still set, and Retry starts one import when the network is back",
+      "verify_with": "browser",
+      "wcag_refs": [
+        "WCAG 2.2 SC 3.3.1",
+        "WCAG 2.2 SC 3.3.4"
+      ]
+    },
+    {
+      "ac_id": "AC-DOUBLE-SUBMIT",
+      "given": "The admin is on the confirmation step",
+      "when": "they press \"Import 248 contacts\" twice in quick succession",
+      "then": "only one import starts and the contacts list has no duplicates",
+      "verify_with": "browser",
+      "wcag_refs": [
+        "WCAG 2.2 SC 3.3.4"
+      ]
+    },
+    {
+      "ac_id": "AC-PROGRESS-STATUS",
+      "given": "An import is running",
+      "when": "the progress count changes",
+      "then": "a screen reader announces the new count in a polite live region without moving focus",
+      "verify_with": "manual",
+      "wcag_refs": [
+        "WCAG 2.2 SC 4.1.3"
+      ]
+    },
+    {
+      "ac_id": "AC-PARTIAL-REPORT",
+      "given": "3 of 251 rows have an invalid email address",
+      "when": "the import finishes",
+      "then": "the result shows 248 added and 3 skipped, and the downloaded file lists each skipped row with a reason",
+      "verify_with": "unit",
+      "wcag_refs": []
+    },
+    {
+      "ac_id": "AC-SESSION-KEPT",
+      "given": "The session expires on the confirmation step",
+      "when": "the admin signs in again",
+      "then": "they return to the confirmation step and the column match is still set",
+      "verify_with": "browser",
+      "wcag_refs": [
+        "WCAG 2.2 SC 2.2.5"
+      ]
+    }
+  ],
+  "options_considered": [
+    {
+      "option": "Four-step wizard with a preview",
+      "tradeoffs": "More steps, but the admin sees the data before it is stored and can fix the match.",
+      "chosen": true
+    },
+    {
+      "option": "One page with auto-detected columns",
+      "tradeoffs": "Faster, but a wrong guess stores bad data and the admin has no way to check it.",
+      "chosen": false
+    }
+  ],
+  "decisions": [
+    {
+      "decision_id": "update-on-duplicate",
+      "date": "2026-10-08",
+      "decision": "Update an existing contact when the email address matches.",
+      "reason": "Duplicates are the most common complaint about imports.",
+      "source": "Assumption from the product owner, to confirm with 3 admins."
+    }
+  ],
+  "assumptions": [
+    {
+      "text": "Most imports have fewer than 1,000 rows.",
+      "validation": "Check the file sizes in the support tickets of the last 3 months."
+    }
+  ],
+  "open_questions": [
+    "Should the import send an email when it finishes, or only show a notification?"
+  ]
+}

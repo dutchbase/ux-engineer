@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "product_id": "contact-importer",
+  "product_name": "Contact importer",
+  "product_locale": "en-GB",
+  "updated_at": "2026-10-08T09:00:00Z",
+  "personas": [
+    {
+      "persona_id": "workspace-admin",
+      "label": "Workspace admin",
+      "proto": true,
+      "summary": "Sets up a team workspace and brings existing contacts in from spreadsheets.",
+      "goals": [
+        "Import the team's contacts once, correctly, without cleaning data by hand."
+      ],
+      "context": "Does this during onboarding, often on a laptop, sometimes on a phone between meetings.",
+      "knowledge": "Knows spreadsheets well; does not know how the app names fields.",
+      "devices": [
+        "laptop",
+        "phone"
+      ],
+      "frustrations": [
+        "Imports that fail halfway and lose their work."
+      ],
+      "sources": [
+        {
+          "attribute": "summary",
+          "kind": "interview",
+          "ref": "owner-interview-2026-10",
+          "validation": null
+        },
+        {
+          "attribute": "goals",
+          "kind": "interview",
+          "ref": "owner-interview-2026-10",
+          "validation": null
+        },
+        {
+          "attribute": "context",
+          "kind": "assumed",
+          "ref": null,
+          "validation": "Ask five admins where and on which device they import."
+        },
+        {
+          "attribute": "knowledge",
+          "kind": "interview",
+          "ref": "owner-interview-2026-10",
+          "validation": null
+        },
+        {
+          "attribute": "devices",
+          "kind": "assumed",
+          "ref": null,
+          "validation": "Check device analytics once available."
+        },
+        {
+          "attribute": "frustrations",
+          "kind": "interview",
+          "ref": "owner-interview-2026-10",
+          "validation": null
+        }
+      ]
+    }
+  ],
+  "jobs": [
+    {
+      "job_id": "import-contacts",
+      "persona_ids": [
+        "workspace-admin"
+      ],
+      "statement": "When I set up the workspace, I want to bring in my existing contact list.",
+      "success_outcome": "All valid contacts are in the workspace with the right fields."
+    }
+  ],
+  "flows": [],
+  "tone": {
+    "voice": "Calm, plain and direct",
+    "use": [
+      "Say what happens next",
+      "Name the problem and the fix"
+    ],
+    "avoid": [
+      "Unlock",
+      "Seamless",
+      "Exclamation marks"
+    ],
+    "notes": null
+  },
+  "accessibility": {
+    "target": "WCAG 2.2 AA",
+    "notes": null
+  },
+  "viewports": [
+    {
+      "name": "phone",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "tablet",
+      "width": 820,
+      "height": 1180
+    },
+    {
+      "name": "laptop",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "wide",
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "design_system": {
+    "kind": "design_md",
+    "path": "DESIGN.md",
+    "notes": null
+  },
+  "decisions": [],
+  "open_questions": [
+    "How large are typical contact files?"
+  ]
+}

@@ -6,9 +6,11 @@ import checksSchema from "../../schemas/checks.schema.json" with { type: "json" 
 import runSchema from "../../schemas/run.schema.json" with { type: "json" };
 import evidenceSchema from "../../schemas/evidence.schema.json" with { type: "json" };
 import findingsSchema from "../../schemas/findings.schema.json" with { type: "json" };
+import flowSchema from "../../schemas/flow.schema.json" with { type: "json" };
+import type { Flow } from "../reports/flow.ts";
 import type { Evidence, Findings, Run } from "./run.ts";
 
-export type Kind = "project" | "checks" | "run" | "evidence" | "findings";
+export type Kind = "project" | "checks" | "run" | "evidence" | "findings" | "flow";
 export type ValidationError = { path: string; message: string };
 export type Result<T> = { ok: true; data: T } | { ok: false; errors: ValidationError[] };
 
@@ -53,7 +55,8 @@ const validators: Record<Kind, ValidateFunction> = {
   checks: ajv.compile(checksSchema),
   run: ajv.compile(runSchema),
   evidence: ajv.compile(evidenceSchema),
-  findings: ajv.compile(findingsSchema)
+  findings: ajv.compile(findingsSchema),
+  flow: ajv.compile(flowSchema)
 };
 
 const jsonPath = (path: string): string => path || "/";
@@ -169,6 +172,52 @@ function findingsSemanticErrors(findings: Findings): ValidationError[] {
   return errors;
 }
 
+const flowErrorKinds = ["network_error", "invalid_input", "session_expired", "conflict"];
+
+function flowSemanticErrors(flow: Flow): ValidationError[] {
+  const errors: ValidationError[] = [];
+  const duplicates = (items: {id: string; path: string}[]) => {
+    const seen = new Set<string>();
+    for (const {id, path} of items) {
+      if (seen.has(id)) errors.push({path, message: `duplicate id "${id}"`});
+      seen.add(id);
+    }
+  };
+  duplicates([
+    ...flow.steps.map((step, i) => ({id: step.step_id, path: `/steps/${i}/step_id`})),
+    ...flow.states.map((state, i) => ({id: state.state_id, path: `/states/${i}/state_id`}))
+  ]);
+  duplicates(flow.steps.flatMap((step, i) => step.actions.map((action, j) => ({id: action.action_id, path: `/steps/${i}/actions/${j}/action_id`}))));
+  duplicates(flow.acceptance_criteria.map((ac, i) => ({id: ac.ac_id, path: `/acceptance_criteria/${i}/ac_id`})));
+  duplicates(flow.risks.map((risk, i) => ({id: risk.risk_id, path: `/risks/${i}/risk_id`})));
+
+  const stepIds = new Set(flow.steps.map((step) => step.step_id));
+  const stateIds = new Set(flow.states.map((state) => state.state_id));
+  const target = (id: string, path: string) => {
+    if (!stepIds.has(id) && !stateIds.has(id)) errors.push({path, message: `unknown step or state "${id}"`});
+  };
+  flow.steps.forEach((step, i) => step.actions.forEach((action, j) => target(action.leads_to, `/steps/${i}/actions/${j}/leads_to`)));
+  flow.states.forEach((state, i) => {
+    if (state.next !== null) target(state.next, `/states/${i}/next`);
+    if (state.step_id !== null && !stepIds.has(state.step_id)) errors.push({path: `/states/${i}/step_id`, message: `unknown step "${state.step_id}"`});
+    if (flowErrorKinds.includes(state.kind) && state.available_actions.length === 0 && state.next === null) {
+      errors.push({path: `/states/${i}`, message: `${state.kind} state requires non-empty available_actions or a non-null next`});
+    }
+  });
+
+  flow.terminal_states.forEach((terminal, i) => {
+    if (!stateIds.has(terminal.state_id)) errors.push({path: `/terminal_states/${i}/state_id`, message: `unknown state "${terminal.state_id}"`});
+  });
+  if (!flow.terminal_states.some((terminal) => terminal.outcome === "success")) {
+    errors.push({path: "/terminal_states", message: "at least one terminal state requires outcome success"});
+  }
+
+  if (flow.options_considered.length > 0 && flow.options_considered.filter((option) => option.chosen).length !== 1) {
+    errors.push({path: "/options_considered", message: "exactly one option must be chosen"});
+  }
+  return errors;
+}
+
 export function validateArtifact(kind: Kind, input: unknown): Result<unknown> {
   if (
     typeof input === "object" &&
@@ -190,6 +239,8 @@ export function validateArtifact(kind: Kind, input: unknown): Result<unknown> {
         ? evidenceSemanticErrors(input as Evidence)
         : kind === "findings"
           ? findingsSemanticErrors(input as Findings)
-          : [];
+          : kind === "flow"
+            ? flowSemanticErrors(input as Flow)
+            : [];
   return errors.length > 0 ? {ok: false, errors} : {ok: true, data: input};
 }

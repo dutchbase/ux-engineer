@@ -7992,8 +7992,8 @@ var require_dist = __commonJS({
         return ajv2;
       }
       const [formats, exportName] = opts.mode === "fast" ? [formats_1.fastFormats, fastName] : [formats_1.fullFormats, fullName];
-      const list = opts.formats || formats_1.formatNames;
-      addFormats2(ajv2, list, formats, exportName);
+      const list2 = opts.formats || formats_1.formatNames;
+      addFormats2(ajv2, list2, formats, exportName);
       if (opts.keywords)
         (0, limit_1.default)(ajv2);
       return ajv2;
@@ -8005,11 +8005,11 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name}"`);
       return f;
     };
-    function addFormats2(ajv2, list, fs, exportName) {
+    function addFormats2(ajv2, list2, fs, exportName) {
       var _a;
       var _b;
       (_a = (_b = ajv2.opts.code).formats) !== null && _a !== void 0 ? _a : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
-      for (const f of list)
+      for (const f of list2)
         ajv2.addFormat(f, fs[f]);
     }
     module.exports = exports = formatsPlugin;
@@ -8020,7 +8020,7 @@ var require_dist = __commonJS({
 
 // src/cli.ts
 import { readFileSync as readFileSync2, realpathSync as realpathSync2, writeFileSync } from "node:fs";
-import { join as join2 } from "node:path";
+import { dirname, join as join2 } from "node:path";
 import { fileURLToPath } from "node:url";
 
 // src/reports/render.ts
@@ -8060,7 +8060,7 @@ function summary(bundle) {
     findings: sorted,
     severityCounts: counts(sorted.map((finding) => finding.severity), ["critical", "major", "minor", "advisory"]),
     statusCounts: counts(sorted.map((finding) => finding.status), ["confirmed", "needs_validation", "hypothesis"]),
-    untested: bundle.run.coverage.filter((row) => !row.tested).length,
+    untested: bundle.run.coverage.filter((row2) => !row2.tested).length,
     totalCoverage: bundle.run.coverage.length
   };
 }
@@ -8068,7 +8068,7 @@ function renderMarkdown(bundle) {
   const { run, evidence, checks, findings } = bundle;
   const reportSummary = summary(bundle);
   const evidenceById = new Map(evidence.items.map((item) => [item.evidence_id, item]));
-  const coverage = run.coverage.map((row) => `| ${markdown(row.task)} | ${markdown(row.persona_id)} | ${markdown(row.viewport)} | ${markdown(row.state)} | ${markdown(row.input_method)} | ${row.tested ? "Tested" : "Not tested"} | ${markdown(row.reason)} |`).join("\n");
+  const coverage = run.coverage.map((row2) => `| ${markdown(row2.task)} | ${markdown(row2.persona_id)} | ${markdown(row2.viewport)} | ${markdown(row2.state)} | ${markdown(row2.input_method)} | ${row2.tested ? "Tested" : "Not tested"} | ${markdown(row2.reason)} |`).join("\n");
   const findingRows = sortedFindings(findings.findings).map((finding) => `| ${markdown(finding.finding_id)} | ${markdown(finding.severity)} | ${markdown(finding.status)} | ${markdown(finding.title)} | ${markdown(finding.user_impact)} | ${evidenceText(finding.evidence_ids, evidenceById)} |`).join("\n");
   const checkRows = checks.checks.map((check) => `| ${markdown(check.check_id)} | ${markdown(check.required ? "required" : "optional")} | ${markdown(check.result)} | ${evidenceText(check.evidence_ids, evidenceById)} |`).join("\n");
   const nextSteps = findings.findings.filter((finding) => finding.status === "confirmed").map((finding) => `- ${markdown(finding.finding_id)}: ${markdown(finding.recommendation)}`).join("\n") || "- None";
@@ -8130,10 +8130,10 @@ function renderHtml(bundle) {
   const { run, evidence, checks, findings } = bundle;
   const reportSummary = summary(bundle);
   const evidenceById = new Map(evidence.items.map((item) => [item.evidence_id, item]));
-  const coverage = run.coverage.map((row) => `<tr><td>${html(row.task)}</td><td>${html(row.persona_id)}</td><td>${html(row.viewport)}</td><td>${html(row.state)}</td><td>${html(row.input_method)}</td><td>${row.tested ? "Tested" : "Not tested"}</td><td>${html(row.reason)}</td></tr>`).join("");
+  const coverage = run.coverage.map((row2) => `<tr><td>${html(row2.task)}</td><td>${html(row2.persona_id)}</td><td>${html(row2.viewport)}</td><td>${html(row2.state)}</td><td>${html(row2.input_method)}</td><td>${row2.tested ? "Tested" : "Not tested"}</td><td>${html(row2.reason)}</td></tr>`).join("");
   const findingRows = sortedFindings(findings.findings).map((finding) => `<tr><td>${html(finding.finding_id)}</td><td>${html(finding.severity)}</td><td>${html(finding.status)}</td><td>${html(finding.title)}</td><td>${html(finding.user_impact)}</td><td>${evidenceHtml(finding.evidence_ids, evidenceById)}</td></tr>`).join("");
   const checkRows = checks.checks.map((check) => `<tr><td>${html(check.check_id)}</td><td>${html(check.required ? "required" : "optional")}</td><td>${html(check.result)}</td><td>${evidenceHtml(check.evidence_ids, evidenceById)}</td></tr>`).join("");
-  const list = (values) => values.length === 0 ? "<li>None</li>" : values.map((value) => `<li>${html(value)}</li>`).join("");
+  const list2 = (values) => values.length === 0 ? "<li>None</li>" : values.map((value) => `<li>${html(value)}</li>`).join("");
   const nextSteps = findings.findings.filter((finding) => finding.status === "confirmed").map((finding) => `<li><strong>${html(finding.finding_id)}</strong>: ${html(finding.recommendation)}</li>`).join("") || "<li>None</li>";
   return `<!doctype html>
 <html lang="en">
@@ -8163,7 +8163,7 @@ ul { padding-left: 22px; }
 <section><h2>Target and scope</h2><div class="card"><p><strong>URL:</strong> ${html(run.target.url)}</p><p><strong>Environment:</strong> ${html(run.target.environment)}</p><p><strong>Description:</strong> ${html(run.target.description)}</p><p><strong>Scope:</strong> ${html(run.scope)}</p></div></section>
 <section><h2>Run status</h2><div class="card status"><strong>${html(run.status)}</strong> \u2014 ${html(statusMeaning[run.status])}</div></section>
 <section><h2>Summary</h2><div class="card">${reportSummary.findings.length === 0 ? "<p>No findings.</p>" : `<p><strong>Findings:</strong> ${reportSummary.findings.length} (${html(reportSummary.severityCounts)}; ${html(reportSummary.statusCounts)})</p><p><strong>Top findings:</strong></p><ol>${reportSummary.findings.slice(0, 5).map((finding) => `<li><strong>${html(finding.severity)}, ${html(finding.status)}</strong> \u2014 ${html(finding.title)}</li>`).join("")}</ol>`}<p><strong>Coverage:</strong> ${reportSummary.untested} of ${reportSummary.totalCoverage} coverage rows not tested</p></div></section>
-<section><h2>Blockers and limitations</h2><div class="card"><h3>Blockers</h3><ul>${list(run.blockers)}</ul><h3>Limitations</h3><ul>${list(run.limitations)}</ul></div></section>
+<section><h2>Blockers and limitations</h2><div class="card"><h3>Blockers</h3><ul>${list2(run.blockers)}</ul><h3>Limitations</h3><ul>${list2(run.limitations)}</ul></div></section>
 <section><h2>Coverage</h2><div class="card"><table><thead><tr><th>Task</th><th>Persona</th><th>Viewport</th><th>State</th><th>Input method</th><th>Result</th><th>Reason</th></tr></thead><tbody>${coverage}</tbody></table></div></section>
 <section><h2>Findings</h2><div class="card"><table><thead><tr><th>ID</th><th>Severity</th><th>Status</th><th>Title</th><th>User impact</th><th>Evidence</th></tr></thead><tbody>${findingRows || '<tr><td colspan="6">None</td></tr>'}</tbody></table></div></section>
 <section><h2>Checks</h2><div class="card"><table><thead><tr><th>Check</th><th>Requirement</th><th>Result</th><th>Evidence</th></tr></thead><tbody>${checkRows || '<tr><td colspan="4">None</td></tr>'}</tbody></table></div></section>
@@ -8175,6 +8175,86 @@ ul { padding-left: 22px; }
 }
 function renderReport(bundle, format) {
   return format === "md" ? renderMarkdown(bundle) : renderHtml(bundle);
+}
+
+// src/reports/flow.ts
+var cell = (value) => (value === null || value === "" ? "\u2014" : value).replaceAll("|", "\\|").replaceAll("\n", " ");
+var list = (values) => values.length === 0 ? "- None" : values.map((value) => `- ${value}`).join("\n");
+var row = (...values) => `| ${values.map(cell).join(" | ")} |`;
+var table = (header, rows) => rows.length === 0 ? "None" : [row(...header), row(...header.map(() => "---")), ...rows].join("\n");
+var copyList = (copy) => copy.length === 0 ? "" : `
+  - Copy:
+${copy.map((item) => `    - \`${item.key}\`: ${item.text}`).join("\n")}`;
+function renderFlow(flow) {
+  const steps = flow.steps.map((step) => [
+    `### ${step.title} (\`${step.step_id}\`)`,
+    `- Screen: ${step.screen}`,
+    `- User intent: ${step.user_intent}`,
+    `- Information needed: ${step.information_needed.length === 0 ? "None" : step.information_needed.join("; ")}`,
+    `- Actions:${step.actions.length === 0 ? " None" : "\n" + step.actions.map((action) => `  - ${action.label} (${action.kind}) \u2192 \`${action.leads_to}\``).join("\n")}` + copyList(step.copy)
+  ].join("\n"));
+  const stateCopy = flow.states.filter((state) => state.copy.length > 0).map((state) => `- \`${state.state_id}\`
+${state.copy.map((item) => `  - \`${item.key}\`: ${item.text}`).join("\n")}`);
+  const sections = [
+    `Generated from ${flow.flow_id}.json. Do not edit.`,
+    `# ${flow.name}`,
+    `Flow: \`${flow.flow_id}\` \xB7 Product: \`${flow.product_id}\` \xB7 Scope: ${flow.scope} \xB7 Design system: ${flow.design_system_ref ?? "none"}`,
+    `## Goal
+
+${flow.goal}`,
+    `## Personas
+
+${list(flow.persona_ids.map((id) => `\`${id}\``))}
+
+Prerequisites:
+
+${list(flow.prerequisites)}`,
+    `## Entry points
+
+${table(["From", "Context"], flow.entry_points.map((entry) => row(entry.from, entry.context)))}`,
+    `## Steps
+
+${steps.length === 0 ? "None" : steps.join("\n\n")}`,
+    `## States
+
+${table(
+      ["State", "Step", "Kind", "Trigger", "Visible feedback", "Available actions", "Next"],
+      flow.states.map((state) => row(state.state_id, state.step_id, state.kind, state.trigger, state.visible_feedback, state.available_actions.join("; "), state.next))
+    )}` + (stateCopy.length > 0 ? `
+
+State copy:
+
+${stateCopy.join("\n")}` : ""),
+    `## Terminal states
+
+${table(["State", "Outcome", "Observable result"], flow.terminal_states.map((t) => row(t.state_id, t.outcome, t.observable_result)))}`,
+    `## Risks
+
+${table(["Risk", "Description", "Mitigation"], flow.risks.map((r) => row(r.risk_id, r.description, r.mitigation)))}`,
+    `## Acceptance criteria
+
+${flow.acceptance_criteria.length === 0 ? "None" : flow.acceptance_criteria.map((ac) => [
+      `### ${ac.ac_id}`,
+      `- Given: ${ac.given}`,
+      `- When: ${ac.when}`,
+      `- Then: ${ac.then}`,
+      `- Verify with: ${ac.verify_with}`,
+      `- WCAG: ${ac.wcag_refs.length === 0 ? "\u2014" : ac.wcag_refs.join("; ")}`
+    ].join("\n")).join("\n\n")}`,
+    `## Options considered
+
+${table(["Option", "Trade-offs", "Chosen"], flow.options_considered.map((o) => row(o.option, o.tradeoffs, o.chosen ? "yes" : "no")))}`,
+    `## Decisions
+
+${table(["Decision", "Date", "What", "Reason", "Source"], flow.decisions.map((d) => row(d.decision_id, d.date, d.decision, d.reason, d.source)))}`,
+    `## Assumptions
+
+${table(["Assumption", "How to validate"], flow.assumptions.map((a) => row(a.text, a.validation)))}`,
+    `## Open questions
+
+${list(flow.open_questions)}`
+  ];
+  return sections.join("\n\n") + "\n";
 }
 
 // src/contracts/run.ts
@@ -8514,6 +8594,120 @@ var findings_schema_default = {
   }
 };
 
+// schemas/flow.schema.json
+var flow_schema_default = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  $id: "https://github.com/dutchbase/ux-engineer/schemas/flow.schema.json",
+  type: "object",
+  additionalProperties: false,
+  required: ["schema_version", "flow_id", "name", "product_id", "persona_ids", "goal", "scope", "design_system_ref", "entry_points", "prerequisites", "steps", "states", "terminal_states", "risks", "acceptance_criteria", "options_considered", "decisions", "assumptions", "open_questions"],
+  $defs: {
+    id: { type: "string", pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    strings: { type: "array", items: { type: "string" } },
+    copy: {
+      type: "array",
+      items: { type: "object", additionalProperties: false, required: ["key", "text"], properties: { key: { type: "string" }, text: { type: "string" } } }
+    }
+  },
+  properties: {
+    schema_version: { const: "1.0" },
+    flow_id: { $ref: "#/$defs/id" },
+    name: { type: "string" },
+    product_id: { $ref: "#/$defs/id" },
+    persona_ids: { type: "array", minItems: 1, items: { $ref: "#/$defs/id" } },
+    goal: { type: "string" },
+    scope: { enum: ["light", "targeted", "standard", "deep"] },
+    design_system_ref: { type: ["string", "null"] },
+    entry_points: {
+      type: "array",
+      items: { type: "object", additionalProperties: false, required: ["from", "context"], properties: { from: { type: "string" }, context: { type: "string" } } }
+    },
+    prerequisites: { $ref: "#/$defs/strings" },
+    steps: {
+      type: "array",
+      minItems: 1,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["step_id", "title", "user_intent", "screen", "information_needed", "actions", "copy"],
+        properties: {
+          step_id: { $ref: "#/$defs/id" },
+          title: { type: "string" },
+          user_intent: { type: "string" },
+          screen: { type: "string" },
+          information_needed: { $ref: "#/$defs/strings" },
+          actions: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["action_id", "label", "kind", "leads_to"],
+              properties: { action_id: { $ref: "#/$defs/id" }, label: { type: "string" }, kind: { enum: ["primary", "secondary", "destructive", "navigation"] }, leads_to: { $ref: "#/$defs/id" } }
+            }
+          },
+          copy: { $ref: "#/$defs/copy" }
+        }
+      }
+    },
+    states: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["state_id", "step_id", "kind", "trigger", "visible_feedback", "available_actions", "next", "copy"],
+        properties: {
+          state_id: { $ref: "#/$defs/id" },
+          step_id: { oneOf: [{ $ref: "#/$defs/id" }, { type: "null" }] },
+          kind: { enum: ["first_use", "empty", "loading", "long_running", "invalid_input", "partial_result", "unauthorized", "session_expired", "network_error", "conflict", "double_action", "back", "cancel", "resume", "recovery", "success", "other"] },
+          trigger: { type: "string" },
+          visible_feedback: { type: "string" },
+          available_actions: { $ref: "#/$defs/strings" },
+          next: { oneOf: [{ $ref: "#/$defs/id" }, { type: "null" }] },
+          copy: { $ref: "#/$defs/copy" }
+        }
+      }
+    },
+    terminal_states: {
+      type: "array",
+      items: { type: "object", additionalProperties: false, required: ["state_id", "outcome", "observable_result"], properties: { state_id: { $ref: "#/$defs/id" }, outcome: { enum: ["success", "failure", "abandoned"] }, observable_result: { type: "string" } } }
+    },
+    risks: {
+      type: "array",
+      items: { type: "object", additionalProperties: false, required: ["risk_id", "description", "mitigation"], properties: { risk_id: { $ref: "#/$defs/id" }, description: { type: "string" }, mitigation: { type: "string" } } }
+    },
+    acceptance_criteria: {
+      type: "array",
+      minItems: 1,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["ac_id", "given", "when", "then", "verify_with", "wcag_refs"],
+        properties: {
+          ac_id: { type: "string", pattern: "^AC-[A-Z0-9-]+$" },
+          given: { type: "string" },
+          when: { type: "string" },
+          then: { type: "string" },
+          verify_with: { enum: ["browser", "unit", "manual", "analytics"] },
+          wcag_refs: { $ref: "#/$defs/strings" }
+        }
+      }
+    },
+    options_considered: {
+      type: "array",
+      items: { type: "object", additionalProperties: false, required: ["option", "tradeoffs", "chosen"], properties: { option: { type: "string" }, tradeoffs: { type: "string" }, chosen: { type: "boolean" } } }
+    },
+    decisions: {
+      type: "array",
+      items: { type: "object", additionalProperties: false, required: ["decision_id", "date", "decision", "reason", "source"], properties: { decision_id: { $ref: "#/$defs/id" }, date: { type: "string", format: "date" }, decision: { type: "string" }, reason: { type: "string" }, source: { type: "string" } } }
+    },
+    assumptions: {
+      type: "array",
+      items: { type: "object", additionalProperties: false, required: ["text", "validation"], properties: { text: { type: "string" }, validation: { type: "string" } } }
+    },
+    open_questions: { $ref: "#/$defs/strings" }
+  }
+};
+
 // src/contracts/validate.ts
 var ajv = new import__.default({ allErrors: true });
 (0, import_ajv_formats.default)(ajv);
@@ -8522,7 +8716,8 @@ var validators = {
   checks: ajv.compile(checks_schema_default),
   run: ajv.compile(run_schema_default),
   evidence: ajv.compile(evidence_schema_default),
-  findings: ajv.compile(findings_schema_default)
+  findings: ajv.compile(findings_schema_default),
+  flow: ajv.compile(flow_schema_default)
 };
 var jsonPath = (path) => path || "/";
 var schemaErrors = (validator) => (validator.errors ?? []).map((error) => ({
@@ -8615,13 +8810,54 @@ function findingsSemanticErrors(findings) {
   });
   return errors;
 }
+var flowErrorKinds = ["network_error", "invalid_input", "session_expired", "conflict"];
+function flowSemanticErrors(flow) {
+  const errors = [];
+  const duplicates = (items) => {
+    const seen = /* @__PURE__ */ new Set();
+    for (const { id, path } of items) {
+      if (seen.has(id)) errors.push({ path, message: `duplicate id "${id}"` });
+      seen.add(id);
+    }
+  };
+  duplicates([
+    ...flow.steps.map((step, i) => ({ id: step.step_id, path: `/steps/${i}/step_id` })),
+    ...flow.states.map((state, i) => ({ id: state.state_id, path: `/states/${i}/state_id` }))
+  ]);
+  duplicates(flow.steps.flatMap((step, i) => step.actions.map((action, j) => ({ id: action.action_id, path: `/steps/${i}/actions/${j}/action_id` }))));
+  duplicates(flow.acceptance_criteria.map((ac, i) => ({ id: ac.ac_id, path: `/acceptance_criteria/${i}/ac_id` })));
+  duplicates(flow.risks.map((risk, i) => ({ id: risk.risk_id, path: `/risks/${i}/risk_id` })));
+  const stepIds = new Set(flow.steps.map((step) => step.step_id));
+  const stateIds = new Set(flow.states.map((state) => state.state_id));
+  const target = (id, path) => {
+    if (!stepIds.has(id) && !stateIds.has(id)) errors.push({ path, message: `unknown step or state "${id}"` });
+  };
+  flow.steps.forEach((step, i) => step.actions.forEach((action, j) => target(action.leads_to, `/steps/${i}/actions/${j}/leads_to`)));
+  flow.states.forEach((state, i) => {
+    if (state.next !== null) target(state.next, `/states/${i}/next`);
+    if (state.step_id !== null && !stepIds.has(state.step_id)) errors.push({ path: `/states/${i}/step_id`, message: `unknown step "${state.step_id}"` });
+    if (flowErrorKinds.includes(state.kind) && state.available_actions.length === 0 && state.next === null) {
+      errors.push({ path: `/states/${i}`, message: `${state.kind} state requires non-empty available_actions or a non-null next` });
+    }
+  });
+  flow.terminal_states.forEach((terminal, i) => {
+    if (!stateIds.has(terminal.state_id)) errors.push({ path: `/terminal_states/${i}/state_id`, message: `unknown state "${terminal.state_id}"` });
+  });
+  if (!flow.terminal_states.some((terminal) => terminal.outcome === "success")) {
+    errors.push({ path: "/terminal_states", message: "at least one terminal state requires outcome success" });
+  }
+  if (flow.options_considered.length > 0 && flow.options_considered.filter((option) => option.chosen).length !== 1) {
+    errors.push({ path: "/options_considered", message: "exactly one option must be chosen" });
+  }
+  return errors;
+}
 function validateArtifact(kind, input) {
   if (typeof input === "object" && input !== null && typeof input.schema_version === "string" && !input.schema_version.startsWith("1.")) {
     return { ok: false, errors: [{ path: "/schema_version", message: "unsupported schema major" }] };
   }
   const validator = validators[kind];
   if (!validator(input)) return { ok: false, errors: schemaErrors(validator) };
-  const errors = kind === "project" ? projectSemanticErrors(input) : kind === "checks" ? checksSemanticErrors(input) : kind === "evidence" ? evidenceSemanticErrors(input) : kind === "findings" ? findingsSemanticErrors(input) : [];
+  const errors = kind === "project" ? projectSemanticErrors(input) : kind === "checks" ? checksSemanticErrors(input) : kind === "evidence" ? evidenceSemanticErrors(input) : kind === "findings" ? findingsSemanticErrors(input) : kind === "flow" ? flowSemanticErrors(input) : [];
   return errors.length > 0 ? { ok: false, errors } : { ok: true, data: input };
 }
 
@@ -8708,7 +8944,7 @@ function validateRunDir(dir) {
 }
 
 // src/cli.ts
-var usage = "usage: node ux.mjs validate <project|checks|run|evidence|findings> <file> | validate-run <dir> | render <dir> [--format md|html|both] | status <checks.json> [--blocker <text>]...";
+var usage = "usage: node ux.mjs validate <project|checks|run|evidence|findings|flow> <file> | validate-run <dir> | render <dir> [--format md|html|both] | render-flow <flow.json> | status <checks.json> [--blocker <text>]...";
 var formattedErrors = (result) => result.errors.map((error) => `${error.path}: ${error.message}`);
 function readJson2(path) {
   return JSON.parse(readFileSync2(path, "utf8"));
@@ -8730,7 +8966,7 @@ function parseChecks(file) {
 }
 function runCli(args) {
   const [command, ...rest] = args;
-  if (command === "validate" && rest.length === 2 && ["project", "checks", "run", "evidence", "findings"].includes(rest[0])) {
+  if (command === "validate" && rest.length === 2 && ["project", "checks", "run", "evidence", "findings", "flow"].includes(rest[0])) {
     return validateFile(rest[0], rest[1]);
   }
   if (command === "validate-run" && rest.length === 1) {
@@ -8758,6 +8994,19 @@ function runCli(args) {
       return { status: 0, output, errors: [] };
     } catch (error) {
       return { status: 2, output: [], errors: [dir, error instanceof Error ? error.message : String(error)] };
+    }
+  }
+  if (command === "render-flow" && rest.length === 1) {
+    const file = rest[0];
+    try {
+      const flow = readJson2(file);
+      const result = validateArtifact("flow", flow);
+      if (!result.ok) return { status: 1, output: formattedErrors(result).map((line) => `${file}: ${line}`), errors: [] };
+      const path = join2(dirname(file), `${flow.flow_id}.md`);
+      writeFileSync(path, renderFlow(flow));
+      return { status: 0, output: [path], errors: [] };
+    } catch (error) {
+      return { status: 2, output: [], errors: [`${file}: ${error instanceof Error ? error.message : String(error)}`] };
     }
   }
   if (command === "status" && rest.length >= 1) {

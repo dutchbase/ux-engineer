@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "plugin_version": "0.2.0",
+  "plugin_version": "0.3.0",
   "results": [
     {
       "host": "claude-code",
@@ -11,10 +11,11 @@
       "skill_discovery": "pass",
       "modes": [
         "setup",
+        "plan",
         "audit"
       ],
       "result": "pass",
-      "notes": "setup: claude plugin eval case setup-new-project passed all scored graders (1 run); no-plugin baseline failed all. audit: claude plugin eval case audit-no-browser passed (run correctly blocked, no invented evidence). Browser audits cannot run inside the claude plugin eval shell sandbox on Linux (Chromium sockets blocked; the agent correctly reported blocked), so they run via evals/_shared/run-audit-local.sh. Final clean runs (plugin and app from temp copies; transcripts checked for ground-truth access): audit-lost-input found the planted defect as a confirmed major finding with screenshot evidence; audit-correct claimed no planted defect and no confirmed major. Both passed validate-run; no target files changed. Earlier runs were excluded because the agent could reach the app source through the process list."
+      "notes": "setup: claude plugin eval case setup-new-project passed all scored graders (1 run); no-plugin baseline failed all. audit: claude plugin eval case audit-no-browser passed (run correctly blocked, no invented evidence). Browser audits cannot run inside the claude plugin eval shell sandbox on Linux (Chromium sockets blocked; the agent correctly reported blocked), so they run via evals/_shared/run-audit-local.sh. Final clean runs (plugin and app from temp copies; transcripts checked for ground-truth access): audit-lost-input found the planted defect as a confirmed major finding with screenshot evidence; audit-correct claimed no planted defect and no confirmed major. Both passed validate-run; no target files changed. Earlier runs were excluded because the agent could reach the app source through the process list. plan (claude plugin eval, with no-plugin baseline): plan-csv-import passed all graders (baseline wrote no flow); plan-ai-tell-override passed (baseline did not log the decision); plan-light passed 3/3 with --judge-model sonnet after the light profile was tightened. Generated flow.json and project.json passed the validator."
     },
     {
       "host": "codex",

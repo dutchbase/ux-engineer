@@ -3,7 +3,7 @@
 A plugin for Claude Code, Codex, OpenCode and Claude desktop that makes coding agents design for real people before they build a UI.
 
 > [!IMPORTANT]
-> Early development. Two commands work but are experimental: `ux-setup` and `ux-audit`. Everything else in this README is planned. The full design is in [`docs/design.md`](docs/design.md), and known gaps are in [`docs/limitations.md`](docs/limitations.md).
+> Early development. Three commands work but are experimental: `ux-setup`, `ux-plan` and `ux-audit`. Everything else in this README is planned. The full design is in [`docs/design.md`](docs/design.md), and known gaps are in [`docs/limitations.md`](docs/limitations.md).
 
 ## Install
 
@@ -27,6 +27,7 @@ Then install UX Engineer from the `/plugins` list.
 Then, in your project:
 
 - `/ux-engineer:ux-setup` (Claude) or `$ux-setup` (Codex) interviews you about your users and writes `docs/ux/project.json`. For a long interview, install [Brainstormform](https://github.com/dutchbase/Brainstormform) first; without it, the plugin asks its questions in the chat.
+- `/ux-engineer:ux-plan <feature>` or `$ux-plan` designs the flow for a feature: steps, error and recovery states, UX copy in your tone, and acceptance criteria your coding agent can test. It writes `docs/ux/flows/<flow-id>.json` and a readable `.md` next to it. A tiny change gets a short answer and no files.
 - `/ux-engineer:ux-audit` or `$ux-audit` walks through a task in your running app (local, staging or preview) in a real browser, at phone, tablet, laptop and wide-screen sizes. It writes findings with screenshots as evidence and a Markdown and HTML report to `.ux/runs/`. It uses your agent's browser tool, or the [Playwright CLI](https://github.com/microsoft/playwright-cli) if there is none, and it needs Node 18 or newer.
 
 ## Why
@@ -57,7 +58,7 @@ Everything the plugin learns about your product (personas, key flows, tone of vo
 3. Proof before "it works". Nothing is reported as verified without evidence that fits the claim. A screenshot does not prove keyboard access. Missing checks make a run `incomplete`, not `passed`.
 4. It does not write your code. It hands briefs, flows and acceptance criteria to the agent that does. If it wants to add a test file, it asks first.
 5. Simple stays simple. Small changes get small answers.
-6. No generic AI look. A researched blocklist of common AI design patterns is avoided by default. You can still have them if you insist.
+6. No generic AI look. A [researched blocklist](shared/references/ai-tells.md) of 28 common AI design patterns, such as labels above every heading or purple gradients, is avoided by default. You can still have one if you insist; the decision is logged.
 7. Your design system wins. The plugin reads your `DESIGN.md` or design tokens and works inside them.
 
 ## Planned hosts
@@ -87,7 +88,7 @@ One repository, one copy of each skill, thin adapters per host. Details are in [
     findings with evidence, report in Markdown and HTML
 ```
 
-`ux-setup` and `ux-audit` exist today. `ux-plan` shows the intended shape.
+All three commands exist today, as experimental versions.
 
 ## Roadmap
 

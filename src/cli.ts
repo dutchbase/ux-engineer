@@ -1,12 +1,13 @@
 import { readFileSync, realpathSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderReport } from "./reports/render.ts";
+import { renderFlow, type Flow } from "./reports/flow.ts";
 import { validateRunDir } from "./contracts/run.ts";
 import { deriveRunStatus, type Check } from "./contracts/verdict.ts";
 import { validateArtifact, type Kind, type Result } from "./contracts/validate.ts";
 
-const usage = "usage: node ux.mjs validate <project|checks|run|evidence|findings> <file> | validate-run <dir> | render <dir> [--format md|html|both] | status <checks.json> [--blocker <text>]...";
+const usage = "usage: node ux.mjs validate <project|checks|run|evidence|findings|flow> <file> | validate-run <dir> | render <dir> [--format md|html|both] | render-flow <flow.json> | status <checks.json> [--blocker <text>]...";
 
 export type CliResult = { status: 0 | 1 | 2; output: string[]; errors: string[] };
 
@@ -36,7 +37,7 @@ function parseChecks(file: string): Result<{schema_version: string; run_id: stri
 
 export function runCli(args: string[]): CliResult {
   const [command, ...rest] = args;
-  if (command === "validate" && rest.length === 2 && ["project", "checks", "run", "evidence", "findings"].includes(rest[0])) {
+  if (command === "validate" && rest.length === 2 && ["project", "checks", "run", "evidence", "findings", "flow"].includes(rest[0])) {
     return validateFile(rest[0] as Kind, rest[1]);
   }
 
@@ -66,6 +67,20 @@ export function runCli(args: string[]): CliResult {
       return {status: 0, output, errors: []};
     } catch (error) {
       return {status: 2, output: [], errors: [dir, error instanceof Error ? error.message : String(error)]};
+    }
+  }
+
+  if (command === "render-flow" && rest.length === 1) {
+    const file = rest[0];
+    try {
+      const flow = readJson(file);
+      const result = validateArtifact("flow", flow);
+      if (!result.ok) return {status: 1, output: formattedErrors(result).map((line) => `${file}: ${line}`), errors: []};
+      const path = join(dirname(file), `${(flow as Flow).flow_id}.md`);
+      writeFileSync(path, renderFlow(flow as Flow));
+      return {status: 0, output: [path], errors: []};
+    } catch (error) {
+      return {status: 2, output: [], errors: [`${file}: ${error instanceof Error ? error.message : String(error)}`]};
     }
   }
 

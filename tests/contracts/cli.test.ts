@@ -53,3 +53,28 @@ test("CLI render writes both reports only after validation", () => {
   const invalid = runCli(["render", invalidDir, "--format", "md"]);
   assert.equal(invalid.status, 1);
 });
+
+const flowFixture = (name: string) => fileURLToPath(new URL(`../fixtures/flow/${name}`, import.meta.url));
+
+test("CLI validates a flow and render-flow writes the Markdown next to it", () => {
+  const dir = mkdtempSync(join(tmpdir(), "ux-engineer-flow-"));
+  const file = join(dir, "csv-contact-import.json");
+  cpSync(flowFixture("valid-csv-import.json"), file);
+  assert.deepEqual(runCli(["validate", "flow", file]).output, ["valid"]);
+  const result = runCli(["render-flow", file]);
+  assert.equal(result.status, 0);
+  assert.deepEqual(result.output, [join(dir, "csv-contact-import.md")]);
+  assert.ok(readFileSync(join(dir, "csv-contact-import.md"), "utf8").startsWith("Generated from csv-contact-import.json. Do not edit."));
+});
+
+test("CLI render-flow writes nothing for an invalid flow and exits 2 on bad input", () => {
+  const dir = mkdtempSync(join(tmpdir(), "ux-engineer-flow-"));
+  const file = join(dir, "bad.json");
+  cpSync(flowFixture("invalid-missing-target.json"), file);
+  const result = runCli(["render-flow", file]);
+  assert.equal(result.status, 1);
+  assert.match(result.output.join("\n"), /\/steps\/0\/actions\/0\/leads_to: unknown step or state/);
+  assert.ok(!existsSync(join(dir, "csv-contact-import.md")));
+  assert.equal(runCli(["render-flow"]).status, 2);
+  assert.equal(runCli(["render-flow", join(dir, "missing.json")]).status, 2);
+});

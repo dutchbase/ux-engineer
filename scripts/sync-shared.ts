@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 
-const sharedFiles = {
+export const sharedFiles = {
   "ux-framing": [
     {source: "shared/policies/writing.md", folder: "references"},
     {source: "schemas/project.schema.json", folder: "references"}
@@ -21,7 +21,22 @@ const sharedFiles = {
     {source: "schemas/evidence.schema.json", folder: "references"},
     {source: "schemas/findings.schema.json", folder: "references"},
     {source: "schemas/checks.schema.json", folder: "references"},
+    {source: "shared/references/ai-tells.md", folder: "references"},
     {source: "dist/ux.mjs", folder: "scripts"}
+  ],
+  "ux-flow-design": [
+    {source: "shared/policies/writing.md", folder: "references"},
+    {source: "shared/references/forms.md", folder: "references"},
+    {source: "shared/references/information-architecture.md", folder: "references"},
+    {source: "shared/references/content-design.md", folder: "references"},
+    {source: "shared/references/ai-tells.md", folder: "references"},
+    {source: "schemas/flow.schema.json", folder: "references"},
+    {source: "schemas/project.schema.json", folder: "references"},
+    {source: "dist/ux.mjs", folder: "scripts"}
+  ],
+  "ux-plan": [
+    {source: "shared/policies/writing.md", folder: "references"},
+    {source: "shared/references/ai-tells.md", folder: "references"}
   ]
 } as const;
 

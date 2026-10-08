@@ -54,7 +54,10 @@ same cause affects multiple flows, states, personas, or viewports.
 Use the ten NN/g heuristics as analysis frames, not as laws:
 https://www.nngroup.com/articles/ten-usability-heuristics/
 
-Do not run an AI-tells review until the project has a maintained blocklist.
+Check the screens against `references/ai-tells.md`. Flag a pattern from that
+list only when it hurts the task or trust, and follow the severity rules in
+that file (usually `advisory`). Skip patterns that are part of the user's own
+design system or that the project UX file records as an `ai_tell_override`.
 Treat pure visual taste as out of scope unless it harms the task. Do not
 redesign while collecting a baseline. Give the implementing agent findings,
 evidence, and recommendations instead.
