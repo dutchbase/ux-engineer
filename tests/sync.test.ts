@@ -4,10 +4,11 @@ import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { sharedFiles, syncShared } from "../scripts/sync-shared.ts";
+import { extraCopies, sharedFiles, syncShared } from "../scripts/sync-shared.ts";
 
 const entries = Object.entries(sharedFiles).flatMap(([skill, sources]) =>
-  sources.map(({source, folder}) => ({source, destination: `skills/${skill}/${folder}/${basename(source)}`})));
+  sources.map(({source, folder}) => ({source, destination: `skills/${skill}/${folder}/${basename(source)}`}))).concat(
+  extraCopies.map(({source, destination}) => ({source, destination})));
 const destinations = entries.map(({destination}) => destination);
 
 function createFakeRepo(): string {
@@ -38,6 +39,12 @@ test("syncs shared files and reports only affected copies", () => {
 test("real repository shared copies are in sync", () => {
   const repoRoot = fileURLToPath(new URL("../", import.meta.url));
   assert.deepEqual(syncShared(repoRoot, {check: true}), []);
+});
+
+test("the npx entry point is a copy of the built helper", () => {
+  const root = createFakeRepo();
+  syncShared(root, {check: false});
+  assert.deepEqual(readFileSync(join(root, "cli/ux-engineer.mjs")), readFileSync(join(root, "dist/ux.mjs")));
 });
 
 test("written copies preserve source bytes", () => {

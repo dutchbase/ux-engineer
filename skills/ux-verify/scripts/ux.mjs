@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -2979,7 +2980,7 @@ var require_compile = __commonJS({
       const schOrFunc = root.refs[ref];
       if (schOrFunc)
         return schOrFunc;
-      let _sch = resolve.call(this, root, ref);
+      let _sch = resolve4.call(this, root, ref);
       if (_sch === void 0) {
         const schema = (_a = root.localRefs) === null || _a === void 0 ? void 0 : _a[ref];
         const { schemaId } = this.opts;
@@ -3006,7 +3007,7 @@ var require_compile = __commonJS({
     function sameSchemaEnv(s1, s2) {
       return s1.schema === s2.schema && s1.root === s2.root && s1.baseId === s2.baseId;
     }
-    function resolve(root, ref) {
+    function resolve4(root, ref) {
       let sch;
       while (typeof (sch = this.refs[ref]) == "string")
         ref = sch;
@@ -3836,7 +3837,7 @@ var require_fast_uri = __commonJS({
       }
       return uri;
     }
-    function resolve(baseURI, relativeURI, options) {
+    function resolve4(baseURI, relativeURI, options) {
       const schemelessOptions = options ? Object.assign({ scheme: "null" }, options) : { scheme: "null" };
       const {
         parsed: baseParsed,
@@ -3869,49 +3870,49 @@ var require_fast_uri = __commonJS({
       schemelessOptions.skipEscape = true;
       return serialize(resolved, schemelessOptions);
     }
-    function resolveComponent(base, relative2, options, skipNormalization) {
+    function resolveComponent(base, relative3, options, skipNormalization) {
       const target = {};
       if (!skipNormalization) {
         base = parse(serialize(base, options), options);
-        relative2 = parse(serialize(relative2, options), options);
+        relative3 = parse(serialize(relative3, options), options);
       }
       options = options || {};
-      if (!options.tolerant && relative2.scheme) {
-        target.scheme = relative2.scheme;
-        target.userinfo = relative2.userinfo;
-        target.host = relative2.host;
-        target.port = relative2.port;
-        target.path = removeDotSegments(relative2.path || "");
-        target.query = relative2.query;
+      if (!options.tolerant && relative3.scheme) {
+        target.scheme = relative3.scheme;
+        target.userinfo = relative3.userinfo;
+        target.host = relative3.host;
+        target.port = relative3.port;
+        target.path = removeDotSegments(relative3.path || "");
+        target.query = relative3.query;
       } else {
-        if (relative2.userinfo !== void 0 || relative2.host !== void 0 || relative2.port !== void 0) {
-          target.userinfo = relative2.userinfo;
-          target.host = relative2.host;
-          target.port = relative2.port;
-          target.path = removeDotSegments(relative2.path || "");
-          target.query = relative2.query;
+        if (relative3.userinfo !== void 0 || relative3.host !== void 0 || relative3.port !== void 0) {
+          target.userinfo = relative3.userinfo;
+          target.host = relative3.host;
+          target.port = relative3.port;
+          target.path = removeDotSegments(relative3.path || "");
+          target.query = relative3.query;
         } else {
-          if (!relative2.path) {
+          if (!relative3.path) {
             target.path = base.path;
-            if (relative2.query !== void 0) {
-              target.query = relative2.query;
+            if (relative3.query !== void 0) {
+              target.query = relative3.query;
             } else {
               target.query = base.query;
             }
           } else {
-            if (relative2.path[0] === "/") {
-              target.path = removeDotSegments(relative2.path);
+            if (relative3.path[0] === "/") {
+              target.path = removeDotSegments(relative3.path);
             } else {
               if ((base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0) && !base.path) {
-                target.path = "/" + relative2.path;
+                target.path = "/" + relative3.path;
               } else if (!base.path) {
-                target.path = relative2.path;
+                target.path = relative3.path;
               } else {
-                target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative2.path;
+                target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative3.path;
               }
               target.path = removeDotSegments(target.path);
             }
-            target.query = relative2.query;
+            target.query = relative3.query;
           }
           target.userinfo = base.userinfo;
           target.host = base.host;
@@ -3919,7 +3920,7 @@ var require_fast_uri = __commonJS({
         }
         target.scheme = base.scheme;
       }
-      target.fragment = relative2.fragment;
+      target.fragment = relative3.fragment;
       return target;
     }
     function equal(uriA, uriB, options) {
@@ -4205,7 +4206,7 @@ var require_fast_uri = __commonJS({
     var fastUri = {
       SCHEMES,
       normalize,
-      resolve,
+      resolve: resolve4,
       resolveComponent,
       equal,
       serialize,
@@ -8019,9 +8020,319 @@ var require_dist = __commonJS({
 });
 
 // src/cli.ts
-import { readFileSync as readFileSync2, realpathSync as realpathSync2, writeFileSync } from "node:fs";
-import { dirname, join as join2 } from "node:path";
+import { existsSync as existsSync5, readFileSync as readFileSync5, readSync, realpathSync as realpathSync3, writeFileSync as writeFileSync2 } from "node:fs";
+import { homedir } from "node:os";
+import { dirname as dirname3, join as join6 } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseArgs } from "node:util";
+
+// src/install/doctor.ts
+import { existsSync as existsSync2, readdirSync as readdirSync2, readFileSync as readFileSync2 } from "node:fs";
+import { join as join2, resolve as resolve2 } from "node:path";
+
+// src/install/plan.ts
+import { createHash } from "node:crypto";
+import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync } from "node:fs";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+var skillFilePath = /^(\.claude|\.agents)\/skills\/[^/]+\/.+/;
+var hostSkillsDirs = [".claude/skills", ".agents/skills"];
+function sha256(bytes) {
+  return createHash("sha256").update(bytes).digest("hex");
+}
+function recordPathOf(root) {
+  return join(resolve(root), ".ux-engineer/install.json");
+}
+function relativeToRoot(root, path) {
+  return relative(resolve(root), resolve(path)).split(sep).join("/");
+}
+function assertInsideRoot(root, path) {
+  const realRoot = realpathSync(root);
+  let existing = resolve(path);
+  const missing = [];
+  while (!exists(existing)) {
+    missing.unshift(basename(existing));
+    const parent = dirname(existing);
+    if (parent === existing) break;
+    existing = parent;
+  }
+  let real;
+  try {
+    real = join(realpathSync(existing), ...missing);
+  } catch {
+    throw new Error(`refusing ${path}: cannot resolve it (dangling symlink?), may be outside ${root}`);
+  }
+  const rel = relative(realRoot, real);
+  if (rel === "" || rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
+    throw new Error(`refusing ${path}: resolves outside ${root}`);
+  }
+}
+function exists(path) {
+  try {
+    lstatSync(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function listFiles(dir) {
+  return readdirSync(dir, { recursive: true, withFileTypes: true }).filter((entry) => entry.isFile()).map((entry) => relative(dir, join(entry.parentPath, entry.name))).sort();
+}
+function hasDotSegment(path) {
+  return path.split("/").some((segment) => segment === "" || segment === "." || segment === "..");
+}
+function isSkillFilePath(path) {
+  return typeof path === "string" && skillFilePath.test(path) && !hasDotSegment(path) && !path.includes("\\");
+}
+function readRecord(recordPath) {
+  if (!existsSync(recordPath)) return null;
+  const record = JSON.parse(readFileSync(recordPath, "utf8"));
+  const bad = [
+    ...record.files.filter((file) => !isSkillFilePath(file.path)).map((file) => file.path),
+    ...record.backups.filter((entry) => !isSkillFilePath(entry.path)).map((entry) => entry.path),
+    ...record.backups.filter((entry) => typeof entry.backup !== "string" || !entry.backup.startsWith(".ux-engineer/backup/") || hasDotSegment(entry.backup)).map((entry) => entry.backup)
+  ];
+  if (bad.length > 0) throw new Error(`invalid record path in ${recordPath}: ${bad.join(", ")}`);
+  return record;
+}
+function assertSafeSkillFile(root, target) {
+  const rel = relativeToRoot(root, target);
+  if (!isSkillFilePath(rel)) throw new Error(`invalid record path: ${rel}`);
+  assertInsideRoot(root, target);
+  const segments = rel.split("/");
+  for (let depth = 3; depth <= segments.length; depth++) {
+    const path = join(root, ...segments.slice(0, depth));
+    if (exists(path) && lstatSync(path).isSymbolicLink()) throw new Error(`refusing ${path}: is a symlink`);
+  }
+}
+function planInstall(opts) {
+  const root = resolve(opts.root);
+  const recordPath = recordPathOf(root);
+  const { version } = JSON.parse(readFileSync(join(opts.sourceRoot, ".claude-plugin/plugin.json"), "utf8"));
+  const skillsDir = join(opts.sourceRoot, "skills");
+  const available = readdirSync(skillsDir, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
+  const skills = opts.skills ?? available;
+  for (const skill of skills) {
+    if (!available.includes(skill)) throw new Error(`unknown skill: ${skill}`);
+  }
+  const recorded = new Map((readRecord(recordPath)?.files ?? []).map((file) => [file.path, file.sha256]));
+  const actions = [];
+  const conflicts = [];
+  for (const targetDir of opts.targets) {
+    assertInsideRoot(root, targetDir);
+    if (!hostSkillsDirs.includes(relativeToRoot(root, targetDir))) {
+      throw new Error(`refusing ${targetDir}: not a host skills folder (.claude/skills or .agents/skills under ${root})`);
+    }
+    for (const skill of skills) {
+      for (const file of listFiles(join(skillsDir, skill))) {
+        const source = join(skillsDir, skill, file);
+        const target = join(resolve(targetDir), skill, file);
+        assertSafeSkillFile(root, target);
+        if (!exists(target)) {
+          actions.push({ kind: "create", target, source });
+          continue;
+        }
+        const current = readFileSync(target);
+        if (current.equals(readFileSync(source))) {
+          actions.push({ kind: "skip-identical", target, source });
+          continue;
+        }
+        const recordedSha = recorded.get(relativeToRoot(root, target));
+        if (recordedSha === sha256(current)) actions.push({ kind: "update", target, source });
+        else conflicts.push({ target, source, reason: recordedSha === void 0 ? "foreign-skill" : "modified-by-user" });
+      }
+    }
+  }
+  return { root, recordPath, version, actions, conflicts };
+}
+
+// src/install/doctor.ts
+function listFiles2(dir) {
+  return readdirSync2(dir, { recursive: true, withFileTypes: true }).filter((entry) => entry.isFile()).map((entry) => join2(entry.parentPath, entry.name).slice(dir.length)).sort();
+}
+function sameFiles(installed, packaged) {
+  if (!existsSync2(packaged)) return false;
+  const files2 = listFiles2(packaged);
+  return JSON.stringify(files2) === JSON.stringify(listFiles2(installed)) && files2.every((file) => readFileSync2(join2(installed, file)).equals(readFileSync2(join2(packaged, file))));
+}
+function doctor(opts) {
+  const { sourceRoot, home, cwd } = opts;
+  const dirs = {
+    projectClaude: join2(cwd, ".claude/skills"),
+    projectAgents: join2(cwd, ".agents/skills"),
+    projectOpencode: join2(cwd, ".opencode/skills"),
+    globalClaude: join2(home, ".claude/skills"),
+    globalAgents: join2(home, ".agents/skills"),
+    globalOpencode: join2(home, ".config/opencode/skills")
+  };
+  const hostGroups = [
+    [dirs.projectClaude, dirs.globalClaude],
+    [dirs.projectAgents, dirs.globalAgents],
+    [dirs.projectOpencode, dirs.globalOpencode, dirs.projectAgents, dirs.globalAgents]
+  ];
+  const names = /* @__PURE__ */ new Map();
+  const locations = [];
+  for (const dir of new Set(Object.values(dirs).map((path) => resolve2(path)))) {
+    if (!existsSync2(dir)) continue;
+    const skills = readdirSync2(dir, { withFileTypes: true }).filter((entry) => entry.isDirectory() && entry.name.startsWith("ux-")).map((entry) => entry.name).sort();
+    if (skills.length === 0) continue;
+    names.set(dir, skills);
+    locations.push({ dir, skills: skills.map((name) => ({ name, matchesPackage: sameFiles(join2(dir, name), join2(sourceRoot, "skills", name)) })) });
+  }
+  const duplicates = /* @__PURE__ */ new Set();
+  for (const group of hostGroups) {
+    const seen = /* @__PURE__ */ new Set();
+    for (const dir of new Set(group.map((path) => resolve2(path)))) {
+      for (const name of names.get(dir) ?? []) {
+        if (seen.has(name)) duplicates.add(name);
+        seen.add(name);
+      }
+    }
+  }
+  const recordPath = [cwd, home].map(recordPathOf).find((path) => existsSync2(path));
+  const record = recordPath ? { path: recordPath, version: readRecord(recordPath).version } : null;
+  return { locations, duplicates: [...duplicates].sort(), record };
+}
+
+// src/install/hosts.ts
+import { existsSync as existsSync3 } from "node:fs";
+import { join as join3 } from "node:path";
+function detectHosts(env) {
+  const found = (...paths) => paths.some((path) => existsSync3(path));
+  const hosts = [];
+  if (found(join3(env.home, ".claude"), join3(env.cwd, ".claude"))) hosts.push("claude-code");
+  if (found(join3(env.home, ".codex"), join3(env.cwd, ".agents"))) hosts.push("codex");
+  if (found(join3(env.home, ".config/opencode"), join3(env.cwd, ".opencode"))) hosts.push("opencode");
+  return hosts;
+}
+function targetDirs(hosts, scope, env) {
+  const base = scope === "project" ? env.cwd : env.home;
+  const dirs = hosts.map((host) => join3(base, host === "claude-code" ? ".claude/skills" : ".agents/skills"));
+  return [...new Set(dirs)].sort();
+}
+
+// src/install/apply.ts
+import { copyFileSync, existsSync as existsSync4, mkdirSync, readdirSync as readdirSync3, readFileSync as readFileSync3, rmdirSync, unlinkSync, writeFileSync } from "node:fs";
+import { dirname as dirname2, join as join4, resolve as resolve3 } from "node:path";
+function changedSincePlan(target) {
+  return new Error(`target changed since plan: ${target}; re-run install`);
+}
+function writeRecord(recordPath, record) {
+  mkdirSync(dirname2(recordPath), { recursive: true });
+  writeFileSync(recordPath, `${JSON.stringify(record, null, 2)}
+`);
+}
+function applyInstall(plan, opts) {
+  if (plan.conflicts.length > 0 && !opts.force) {
+    throw new Error(`conflicts: ${plan.conflicts.length} files; use --force to overwrite`);
+  }
+  const root = resolve3(plan.root);
+  const previous = readRecord(plan.recordPath);
+  const files2 = new Map((previous?.files ?? []).map((file) => [file.path, file.sha256]));
+  const backups = [...previous?.backups ?? []];
+  const stamp = opts.now().toISOString().replaceAll(":", "-");
+  const writes = [...plan.actions.filter((action) => action.kind !== "skip-identical"), ...plan.conflicts];
+  const backupsToMake = plan.conflicts.map(({ target }) => {
+    const path = relativeToRoot(root, target);
+    return { target, path, backup: `.ux-engineer/backup/${stamp}/${path}` };
+  });
+  assertInsideRoot(root, plan.recordPath);
+  for (const { target } of writes) assertSafeSkillFile(root, target);
+  for (const { backup } of backupsToMake) assertInsideRoot(root, join4(root, backup));
+  for (const action of plan.actions) {
+    if (action.kind === "create" && existsSync4(action.target)) throw changedSincePlan(action.target);
+    if (action.kind === "update") {
+      const recordedSha = files2.get(relativeToRoot(root, action.target));
+      if (!existsSync4(action.target) || sha256(readFileSync3(action.target)) !== recordedSha) throw changedSincePlan(action.target);
+    }
+  }
+  for (const { target } of plan.conflicts) if (!existsSync4(target)) throw changedSincePlan(target);
+  let record;
+  try {
+    for (const { target, path, backup } of backupsToMake) {
+      mkdirSync(dirname2(join4(root, backup)), { recursive: true });
+      copyFileSync(target, join4(root, backup));
+      backups.push({ path, backup });
+    }
+    for (const write of writes) {
+      const { source, target } = write;
+      const bytes = readFileSync3(source);
+      mkdirSync(dirname2(target), { recursive: true });
+      writeFileSync(target, bytes, { flag: "kind" in write && write.kind === "create" ? "wx" : "w" });
+      files2.set(relativeToRoot(root, target), sha256(bytes));
+    }
+  } finally {
+    record = saveRecord(plan, previous, files2, backups, opts.now);
+  }
+  return record;
+}
+function saveRecord(plan, previous, files2, backups, now) {
+  const next = {
+    version: plan.version,
+    files: [...files2].map(([path, hash]) => ({ path, sha256: hash })).sort((a, b) => a.path < b.path ? -1 : a.path > b.path ? 1 : 0),
+    backups
+  };
+  if (previous && JSON.stringify({ version: previous.version, files: previous.files, backups: previous.backups }) === JSON.stringify(next)) {
+    return previous;
+  }
+  const record = { version: next.version, installed_at: now().toISOString(), files: next.files, backups: next.backups };
+  writeRecord(plan.recordPath, record);
+  return record;
+}
+function uninstall(root) {
+  root = resolve3(root);
+  const recordPath = recordPathOf(root);
+  const record = readRecord(recordPath);
+  const removed = [];
+  const keptModified = [];
+  const restored = [];
+  const missingBackups = [];
+  if (!record) return { removed, keptModified, restored, missingBackups };
+  for (const { path } of record.files) assertSafeSkillFile(root, join4(root, path));
+  for (const { path, backup } of record.backups) {
+    assertSafeSkillFile(root, join4(root, path));
+    assertInsideRoot(root, join4(root, backup));
+  }
+  const keptFiles = [];
+  for (const file of record.files) {
+    const target = join4(root, file.path);
+    if (!existsSync4(target)) continue;
+    if (sha256(readFileSync3(target)) === file.sha256) {
+      unlinkSync(target);
+      removed.push(file.path);
+    } else {
+      keptModified.push(file.path);
+      keptFiles.push(file);
+    }
+  }
+  const keptBackups = [];
+  for (const entry of record.backups) {
+    const target = join4(root, entry.path);
+    if (restored.includes(entry.path)) continue;
+    if (existsSync4(target)) {
+      keptBackups.push(entry);
+      continue;
+    }
+    if (!existsSync4(join4(root, entry.backup))) {
+      missingBackups.push(entry.path);
+      continue;
+    }
+    mkdirSync(dirname2(target), { recursive: true });
+    copyFileSync(join4(root, entry.backup), target);
+    restored.push(entry.path);
+  }
+  for (const path of removed) removeEmptyFolders(root, path);
+  if (keptFiles.length === 0 && keptBackups.length === 0) unlinkSync(recordPath);
+  else writeRecord(recordPath, { ...record, files: keptFiles, backups: keptBackups });
+  return { removed, keptModified, restored, missingBackups };
+}
+function removeEmptyFolders(root, recordedPath) {
+  const segments = recordedPath.split("/");
+  for (let depth = segments.length - 1; depth >= 3; depth--) {
+    const dir = join4(root, ...segments.slice(0, depth));
+    if (!existsSync4(dir) || readdirSync3(dir).length > 0) return;
+    rmdirSync(dir);
+  }
+}
 
 // src/reports/render.ts
 var severityOrder = { critical: 0, major: 1, minor: 2, advisory: 3 };
@@ -8258,9 +8569,9 @@ ${list(flow.open_questions)}`
 }
 
 // src/contracts/run.ts
-import { createHash } from "node:crypto";
-import { readFileSync, realpathSync } from "node:fs";
-import { isAbsolute, join, relative, win32 } from "node:path";
+import { createHash as createHash2 } from "node:crypto";
+import { readFileSync as readFileSync4, realpathSync as realpathSync2 } from "node:fs";
+import { isAbsolute as isAbsolute2, join as join5, relative as relative2, win32 } from "node:path";
 
 // src/contracts/verdict.ts
 function deriveRunStatus(checks, ctx) {
@@ -9028,7 +9339,7 @@ var files = [
 ];
 function readJson(path) {
   try {
-    return { ok: true, data: JSON.parse(readFileSync(path, "utf8")) };
+    return { ok: true, data: JSON.parse(readFileSync4(path, "utf8")) };
   } catch (error) {
     return { ok: false, errors: [{ path, message: error instanceof Error ? error.message : String(error) }] };
   }
@@ -9043,7 +9354,7 @@ function validateRunDir(dir) {
   const values = {};
   const errors = [];
   for (const [file, kind] of files) {
-    const result = readJson(join(dir, file));
+    const result = readJson(join5(dir, file));
     if (!result.ok) errors.push({ path: file, message: result.errors[0].message });
     else values[kind] = result.data;
   }
@@ -9073,22 +9384,22 @@ function validateRunDir(dir) {
   });
   let realDir;
   try {
-    realDir = realpathSync(dir);
+    realDir = realpathSync2(dir);
   } catch (error) {
     return { ok: false, errors: [{ path: "run", message: error instanceof Error ? error.message : String(error) }] };
   }
   evidence.items.forEach((item, index) => {
     if (!item.file || !item.sha256) return;
-    if (isAbsolute(item.file) || win32.isAbsolute(item.file) || item.file.includes("\\") || item.file.split("/").includes("..")) return;
-    const candidate = join(dir, item.file);
+    if (isAbsolute2(item.file) || win32.isAbsolute(item.file) || item.file.includes("\\") || item.file.split("/").includes("..")) return;
+    const candidate = join5(dir, item.file);
     try {
-      const realFile = realpathSync(candidate);
-      const outside = relative(realDir, realFile).startsWith(`..${process.platform === "win32" ? "\\" : "/"}`) || isAbsolute(relative(realDir, realFile));
+      const realFile = realpathSync2(candidate);
+      const outside = relative2(realDir, realFile).startsWith(`..${process.platform === "win32" ? "\\" : "/"}`) || isAbsolute2(relative2(realDir, realFile));
       if (outside) {
         errors.push({ path: `evidence.json/items/${index}/file`, message: "artifact file resolves outside run directory" });
         return;
       }
-      const actual = createHash("sha256").update(readFileSync(realFile)).digest("hex");
+      const actual = createHash2("sha256").update(readFileSync4(realFile)).digest("hex");
       if (actual.toLowerCase() !== item.sha256.toLowerCase()) errors.push({ path: `evidence.json/items/${index}/sha256`, message: `sha256 mismatch: expected ${item.sha256}, got ${actual}` });
     } catch (error) {
       errors.push({ path: `evidence.json/items/${index}/file`, message: `artifact file is missing or unreadable: ${error instanceof Error ? error.message : String(error)}` });
@@ -9102,10 +9413,10 @@ function validateRunDir(dir) {
 }
 
 // src/cli.ts
-var usage = "usage: node ux.mjs validate <project|checks|run|evidence|findings|flow|research> <file> | validate-run <dir> | render <dir> [--format md|html|both] | render-flow <flow.json> | status <checks.json> [--blocker <text>]...";
+var usage = "usage: node ux.mjs validate <project|checks|run|evidence|findings|flow|research> <file> | validate-run <dir> | render <dir> [--format md|html|both] | render-flow <flow.json> | status <checks.json> [--blocker <text>]... | install [--host claude-code,codex,opencode] [--global] [--skills a,b] [--dry-run] [--yes] [--force] | uninstall [--global] [--yes] | doctor";
 var formattedErrors = (result) => result.errors.map((error) => `${error.path}: ${error.message}`);
 function readJson2(path) {
-  return JSON.parse(readFileSync2(path, "utf8"));
+  return JSON.parse(readFileSync5(path, "utf8"));
 }
 function validateFile(kind, file) {
   try {
@@ -9122,8 +9433,126 @@ function parseChecks(file) {
     return { ok: false, errors: [{ path: file, message: error instanceof Error ? error.message : String(error) }] };
   }
 }
-function runCli(args) {
+function defaultIo() {
+  return {
+    isTTY: Boolean(process.stdin.isTTY),
+    ask: (question) => {
+      process.stdout.write(question);
+      const buffer = Buffer.alloc(256);
+      try {
+        return buffer.toString("utf8", 0, readSync(0, buffer, 0, buffer.length, null)).trim();
+      } catch {
+        return "";
+      }
+    },
+    show: (line) => console.log(line),
+    home: homedir(),
+    cwd: process.cwd()
+  };
+}
+function findSourceRoot() {
+  let dir = dirname3(fileURLToPath(import.meta.url));
+  while (!existsSync5(join6(dir, ".claude-plugin/plugin.json"))) {
+    const parent = dirname3(dir);
+    if (parent === dir) return null;
+    dir = parent;
+  }
+  return dir;
+}
+var hostNames = ["claude-code", "codex", "opencode"];
+var failure = (status, message) => ({ status, output: [], errors: [message] });
+function installerCommand(command, rest, io) {
+  const options = {
+    install: { host: { type: "string" }, global: { type: "boolean" }, skills: { type: "string" }, "dry-run": { type: "boolean" }, yes: { type: "boolean" }, force: { type: "boolean" } },
+    uninstall: { global: { type: "boolean" }, yes: { type: "boolean" } },
+    doctor: {}
+  };
+  let values;
+  try {
+    const parsed = parseArgs({ args: rest, options: options[command], allowPositionals: true });
+    if (parsed.positionals.length > 0) return failure(2, usage);
+    values = parsed.values;
+  } catch {
+    return failure(2, usage);
+  }
+  const sourceRoot = findSourceRoot();
+  if (!sourceRoot) return failure(2, "Run this command from the ux-engineer package (npx github:dutchbase/ux-engineer).");
+  const env = { home: io.home, cwd: io.cwd };
+  const root = values.global ? io.home : io.cwd;
+  const output = [];
+  const rel = (path) => relativeToRoot(root, path);
+  const approve = (summary2) => {
+    if (values.yes) {
+      output.push(...summary2);
+      return null;
+    }
+    if (!io.isTTY) return { status: 3, output: [...summary2, "Re-run with --yes to apply."], errors: [] };
+    summary2.forEach(io.show);
+    if (/^y(es)?$/i.test(io.ask("Apply? [y/N] "))) return null;
+    return { status: 0, output: ["Cancelled. Nothing changed."], errors: [] };
+  };
+  try {
+    if (command === "doctor") {
+      const report = doctor({ sourceRoot, ...env });
+      if (report.locations.length === 0) output.push("No ux-* skills found.");
+      for (const { dir, skills: skills2 } of report.locations) {
+        output.push(dir);
+        skills2.forEach(({ name, matchesPackage }) => output.push(`  ${name}  ${matchesPackage ? "matches package" : "differs from package"}`));
+      }
+      if (report.duplicates.length > 0) output.push(`Duplicates (a host reads these skills from more than one folder): ${report.duplicates.join(", ")}`);
+      output.push(report.record ? `Install record: ${report.record.path} (version ${report.record.version})` : "Install record: none");
+      return { status: 0, output, errors: [] };
+    }
+    if (command === "uninstall") {
+      const record = readRecord(recordPathOf(root));
+      if (!record) return { status: 0, output: [`Nothing to uninstall in ${root}.`], errors: [] };
+      const stop2 = approve([
+        `Uninstall ux-engineer ${record.version} from ${root}: ${record.files.length} recorded files.`,
+        "Files you changed stay. Saved backups come back."
+      ]);
+      if (stop2) return stop2;
+      const result = uninstall(root);
+      result.removed.forEach((path) => output.push(`removed  ${path}`));
+      result.keptModified.forEach((path) => output.push(`kept-modified  ${path}  (changed since install)`));
+      result.restored.forEach((path) => output.push(`restored  ${path}`));
+      result.missingBackups.forEach((path) => output.push(`missing-backup  ${path}`));
+      output.push(`${result.removed.length} removed, ${result.keptModified.length} kept, ${result.restored.length} restored.`);
+      return { status: 0, output, errors: [] };
+    }
+    const hostList = typeof values.host === "string" ? values.host.split(",").filter(Boolean) : null;
+    if (hostList && (hostList.length === 0 || hostList.some((host) => !hostNames.includes(host)))) {
+      return failure(2, `--host takes a comma list of: ${hostNames.join(", ")}`);
+    }
+    const hosts = hostList ?? detectHosts(env);
+    if (hosts.length === 0) return failure(2, "No supported host found. Use --host.");
+    const skills = typeof values.skills === "string" ? values.skills.split(",").filter(Boolean) : void 0;
+    const plan = planInstall({ sourceRoot, root, targets: targetDirs(hosts, values.global ? "global" : "project", env), skills });
+    const lines = [
+      `Install ux-engineer ${plan.version} into ${root} (${values.global ? "global" : "project"}, hosts: ${hosts.join(", ")})`,
+      ...plan.actions.map((action) => `${action.kind === "skip-identical" ? "skip" : action.kind}  ${rel(action.target)}`),
+      ...plan.conflicts.map((conflict) => `conflict  ${rel(conflict.target)}  (${conflict.reason})`)
+    ];
+    if (values["dry-run"]) return { status: 0, output: [...lines, "Dry run: nothing written."], errors: [] };
+    if (plan.conflicts.length > 0 && !values.force) {
+      return { status: 1, output: lines, errors: [`conflicts: ${plan.conflicts.length} files; use --force to overwrite`] };
+    }
+    const stop = approve(lines);
+    if (stop) return stop;
+    applyInstall(plan, { force: Boolean(values.force), now: () => /* @__PURE__ */ new Date() });
+    const count = (kind) => plan.actions.filter((action) => action.kind === kind).length;
+    output.push(
+      `${count("create")} created, ${count("update")} updated, ${count("skip-identical")} unchanged, ${plan.conflicts.length} overwritten (backups in .ux-engineer/backup/).`,
+      "Run /ux-engineer:ux-setup (Claude Code) or $ux-setup (Codex) in this project.",
+      "Suggested AGENTS.md line (not written): Read docs/ux/ before any UI or UX work."
+    );
+    return { status: 0, output, errors: [] };
+  } catch (error) {
+    return failure(1, error instanceof Error ? error.message : String(error));
+  }
+}
+function runCli(args, io = defaultIo()) {
   const [command, ...rest] = args;
+  if (command === "install" || command === "uninstall" || command === "doctor") return installerCommand(command, rest, io);
   if (command === "validate" && rest.length === 2 && ["project", "checks", "run", "evidence", "findings", "flow", "research"].includes(rest[0])) {
     return validateFile(rest[0], rest[1]);
   }
@@ -9145,8 +9574,8 @@ function runCli(args) {
       const formats = format === "both" ? ["md", "html"] : [format];
       const output = [];
       for (const current of formats) {
-        const path = join2(dir, `report.${current}`);
-        writeFileSync(path, renderReport(result.data, current));
+        const path = join6(dir, `report.${current}`);
+        writeFileSync2(path, renderReport(result.data, current));
         output.push(path);
       }
       return { status: 0, output, errors: [] };
@@ -9160,8 +9589,8 @@ function runCli(args) {
       const flow = readJson2(file);
       const result = validateArtifact("flow", flow);
       if (!result.ok) return { status: 1, output: formattedErrors(result).map((line) => `${file}: ${line}`), errors: [] };
-      const path = join2(dirname(file), `${flow.flow_id}.md`);
-      writeFileSync(path, renderFlow(flow));
+      const path = join6(dirname3(file), `${flow.flow_id}.md`);
+      writeFileSync2(path, renderFlow(flow));
       return { status: 0, output: [path], errors: [] };
     } catch (error) {
       return { status: 2, output: [], errors: [`${file}: ${error instanceof Error ? error.message : String(error)}`] };
@@ -9186,7 +9615,7 @@ function runCli(args) {
 function isMainModule() {
   if (!process.argv[1]) return false;
   try {
-    return realpathSync2(process.argv[1]) === realpathSync2(fileURLToPath(import.meta.url));
+    return realpathSync3(process.argv[1]) === realpathSync3(fileURLToPath(import.meta.url));
   } catch {
     return false;
   }

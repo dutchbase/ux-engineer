@@ -1,15 +1,21 @@
-import { readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, readSync, realpathSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseArgs } from "node:util";
+import { doctor } from "./install/doctor.ts";
+import { detectHosts, targetDirs, type Host } from "./install/hosts.ts";
+import { applyInstall, uninstall } from "./install/apply.ts";
+import { planInstall, readRecord, recordPathOf, relativeToRoot } from "./install/plan.ts";
 import { renderReport } from "./reports/render.ts";
 import { renderFlow, type Flow } from "./reports/flow.ts";
 import { validateRunDir } from "./contracts/run.ts";
 import { deriveRunStatus, type Check } from "./contracts/verdict.ts";
 import { validateArtifact, type Kind, type Result } from "./contracts/validate.ts";
 
-const usage = "usage: node ux.mjs validate <project|checks|run|evidence|findings|flow|research> <file> | validate-run <dir> | render <dir> [--format md|html|both] | render-flow <flow.json> | status <checks.json> [--blocker <text>]...";
+const usage = "usage: node ux.mjs validate <project|checks|run|evidence|findings|flow|research> <file> | validate-run <dir> | render <dir> [--format md|html|both] | render-flow <flow.json> | status <checks.json> [--blocker <text>]... | install [--host claude-code,codex,opencode] [--global] [--skills a,b] [--dry-run] [--yes] [--force] | uninstall [--global] [--yes] | doctor";
 
-export type CliResult = { status: 0 | 1 | 2; output: string[]; errors: string[] };
+export type CliResult = { status: 0 | 1 | 2 | 3; output: string[]; errors: string[] };
 
 const formattedErrors = (result: { errors: { path: string; message: string }[] }): string[] =>
   result.errors.map((error) => `${error.path}: ${error.message}`);
@@ -35,8 +41,134 @@ function parseChecks(file: string): Result<{schema_version: string; run_id: stri
   }
 }
 
-export function runCli(args: string[]): CliResult {
+type Io = { isTTY: boolean; ask: (question: string) => string; show: (line: string) => void; home: string; cwd: string };
+
+function defaultIo(): Io {
+  return {
+    isTTY: Boolean(process.stdin.isTTY),
+    ask: (question) => {
+      process.stdout.write(question);
+      const buffer = Buffer.alloc(256);
+      try {
+        return buffer.toString("utf8", 0, readSync(0, buffer, 0, buffer.length, null)).trim();
+      } catch {
+        return "";
+      }
+    },
+    show: (line) => console.log(line),
+    home: homedir(),
+    cwd: process.cwd()
+  };
+}
+
+/** The package root: the nearest folder above the running file that holds .claude-plugin/plugin.json. */
+function findSourceRoot(): string | null {
+  let dir = dirname(fileURLToPath(import.meta.url));
+  while (!existsSync(join(dir, ".claude-plugin/plugin.json"))) {
+    const parent = dirname(dir);
+    if (parent === dir) return null;
+    dir = parent;
+  }
+  return dir;
+}
+
+const hostNames: string[] = ["claude-code", "codex", "opencode"];
+const failure = (status: 1 | 2, message: string): CliResult => ({status, output: [], errors: [message]});
+
+function installerCommand(command: "install" | "uninstall" | "doctor", rest: string[], io: Io): CliResult {
+  const options = {
+    install: {host: {type: "string"}, global: {type: "boolean"}, skills: {type: "string"}, "dry-run": {type: "boolean"}, yes: {type: "boolean"}, force: {type: "boolean"}},
+    uninstall: {global: {type: "boolean"}, yes: {type: "boolean"}},
+    doctor: {}
+  } as const;
+  let values: Record<string, unknown>;
+  try {
+    const parsed = parseArgs({args: rest, options: options[command], allowPositionals: true});
+    if (parsed.positionals.length > 0) return failure(2, usage);
+    values = parsed.values;
+  } catch {
+    return failure(2, usage);
+  }
+
+  const sourceRoot = findSourceRoot();
+  if (!sourceRoot) return failure(2, "Run this command from the ux-engineer package (npx github:dutchbase/ux-engineer).");
+  const env = {home: io.home, cwd: io.cwd};
+  const root = values.global ? io.home : io.cwd;
+  const output: string[] = [];
+  const rel = (path: string) => relativeToRoot(root, path);
+
+  // Writes need approval: --yes, or "y" on a TTY. Returns a result when the command must stop here.
+  const approve = (summary: string[]): CliResult | null => {
+    if (values.yes) {
+      output.push(...summary);
+      return null;
+    }
+    if (!io.isTTY) return {status: 3, output: [...summary, "Re-run with --yes to apply."], errors: []};
+    summary.forEach(io.show);
+    if (/^y(es)?$/i.test(io.ask("Apply? [y/N] "))) return null;
+    return {status: 0, output: ["Cancelled. Nothing changed."], errors: []};
+  };
+
+  try {
+    if (command === "doctor") {
+      const report = doctor({sourceRoot, ...env});
+      if (report.locations.length === 0) output.push("No ux-* skills found.");
+      for (const {dir, skills} of report.locations) {
+        output.push(dir);
+        skills.forEach(({name, matchesPackage}) => output.push(`  ${name}  ${matchesPackage ? "matches package" : "differs from package"}`));
+      }
+      if (report.duplicates.length > 0) output.push(`Duplicates (a host reads these skills from more than one folder): ${report.duplicates.join(", ")}`);
+      output.push(report.record ? `Install record: ${report.record.path} (version ${report.record.version})` : "Install record: none");
+      return {status: 0, output, errors: []};
+    }
+
+    if (command === "uninstall") {
+      const record = readRecord(recordPathOf(root));
+      if (!record) return {status: 0, output: [`Nothing to uninstall in ${root}.`], errors: []};
+      const stop = approve([`Uninstall ux-engineer ${record.version} from ${root}: ${record.files.length} recorded files.`,
+        "Files you changed stay. Saved backups come back."]);
+      if (stop) return stop;
+      const result = uninstall(root);
+      result.removed.forEach((path) => output.push(`removed  ${path}`));
+      result.keptModified.forEach((path) => output.push(`kept-modified  ${path}  (changed since install)`));
+      result.restored.forEach((path) => output.push(`restored  ${path}`));
+      result.missingBackups.forEach((path) => output.push(`missing-backup  ${path}`));
+      output.push(`${result.removed.length} removed, ${result.keptModified.length} kept, ${result.restored.length} restored.`);
+      return {status: 0, output, errors: []};
+    }
+
+    const hostList = typeof values.host === "string" ? values.host.split(",").filter(Boolean) : null;
+    if (hostList && (hostList.length === 0 || hostList.some((host) => !hostNames.includes(host)))) {
+      return failure(2, `--host takes a comma list of: ${hostNames.join(", ")}`);
+    }
+    const hosts = (hostList ?? detectHosts(env)) as Host[];
+    if (hosts.length === 0) return failure(2, "No supported host found. Use --host.");
+    const skills = typeof values.skills === "string" ? values.skills.split(",").filter(Boolean) : undefined;
+    const plan = planInstall({sourceRoot, root, targets: targetDirs(hosts, values.global ? "global" : "project", env), skills});
+
+    const lines = [`Install ux-engineer ${plan.version} into ${root} (${values.global ? "global" : "project"}, hosts: ${hosts.join(", ")})`,
+      ...plan.actions.map((action) => `${action.kind === "skip-identical" ? "skip" : action.kind}  ${rel(action.target)}`),
+      ...plan.conflicts.map((conflict) => `conflict  ${rel(conflict.target)}  (${conflict.reason})`)];
+    if (values["dry-run"]) return {status: 0, output: [...lines, "Dry run: nothing written."], errors: []};
+    if (plan.conflicts.length > 0 && !values.force) {
+      return {status: 1, output: lines, errors: [`conflicts: ${plan.conflicts.length} files; use --force to overwrite`]};
+    }
+    const stop = approve(lines);
+    if (stop) return stop;
+    applyInstall(plan, {force: Boolean(values.force), now: () => new Date()});
+    const count = (kind: string) => plan.actions.filter((action) => action.kind === kind).length;
+    output.push(`${count("create")} created, ${count("update")} updated, ${count("skip-identical")} unchanged, ${plan.conflicts.length} overwritten (backups in .ux-engineer/backup/).`,
+      "Run /ux-engineer:ux-setup (Claude Code) or $ux-setup (Codex) in this project.",
+      "Suggested AGENTS.md line (not written): Read docs/ux/ before any UI or UX work.");
+    return {status: 0, output, errors: []};
+  } catch (error) {
+    return failure(1, error instanceof Error ? error.message : String(error));
+  }
+}
+
+export function runCli(args: string[], io: Io = defaultIo()): CliResult {
   const [command, ...rest] = args;
+  if (command === "install" || command === "uninstall" || command === "doctor") return installerCommand(command, rest, io);
   if (command === "validate" && rest.length === 2 && ["project", "checks", "run", "evidence", "findings", "flow", "research"].includes(rest[0])) {
     return validateFile(rest[0] as Kind, rest[1]);
   }

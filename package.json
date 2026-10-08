@@ -4,6 +4,18 @@
   "private": false,
   "license": "MIT",
   "type": "module",
+  "bin": {
+    "ux-engineer": "cli/ux-engineer.mjs"
+  },
+  "files": [
+    "cli/",
+    "skills/",
+    ".claude-plugin/",
+    ".codex-plugin/",
+    ".agents/",
+    "LICENSE",
+    "README.md"
+  ],
   "engines": {
     "node": ">=24"
   },
@@ -13,7 +25,7 @@
     "typecheck": "tsc --noEmit",
     "sync": "node scripts/sync-shared.ts",
     "validate": "node src/cli.ts validate",
-    "build": "esbuild src/cli.ts --bundle --platform=node --format=esm --target=node18 --outfile=dist/ux.mjs",
+    "build": "esbuild src/cli.ts --bundle --platform=node --format=esm --target=node18 --banner:js='#!/usr/bin/env node' --outfile=dist/ux.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {

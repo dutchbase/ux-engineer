@@ -76,25 +76,32 @@ export const sharedFiles = {
   ]
 } as const;
 
+// Generated copies that are not skill files: the npx entry point.
+export const extraCopies = [
+  {source: "dist/ux.mjs", destination: "cli/ux-engineer.mjs"}
+] as const;
+
 export function syncShared(root: string, opts: {check: boolean}): string[] {
   const outOfDate: string[] = [];
 
-  for (const [skill, sources] of Object.entries(sharedFiles)) {
-    for (const {source, folder} of sources) {
-      if (source === "dist/ux.mjs" && !existsSync(resolve(root, source))) {
-        throw new Error("dist/ux.mjs missing: run pnpm build first");
-      }
-      const destination = `skills/${skill}/${folder}/${basename(source)}`;
-      const sourceBytes = readFileSync(resolve(root, source));
-      const destinationPath = resolve(root, destination);
-      const currentBytes = existsSync(destinationPath) ? readFileSync(destinationPath) : null;
+  const copies = [
+    ...Object.entries(sharedFiles).flatMap(([skill, sources]) =>
+      sources.map(({source, folder}) => ({source, destination: `skills/${skill}/${folder}/${basename(source)}`}))),
+    ...extraCopies
+  ];
+  for (const {source, destination} of copies) {
+    if (source === "dist/ux.mjs" && !existsSync(resolve(root, source))) {
+      throw new Error("dist/ux.mjs missing: run pnpm build first");
+    }
+    const sourceBytes = readFileSync(resolve(root, source));
+    const destinationPath = resolve(root, destination);
+    const currentBytes = existsSync(destinationPath) ? readFileSync(destinationPath) : null;
 
-      if (currentBytes?.equals(sourceBytes)) continue;
-      outOfDate.push(destination);
-      if (!opts.check) {
-        mkdirSync(dirname(destinationPath), {recursive: true});
-        writeFileSync(destinationPath, sourceBytes);
-      }
+    if (currentBytes?.equals(sourceBytes)) continue;
+    outOfDate.push(destination);
+    if (!opts.check) {
+      mkdirSync(dirname(destinationPath), {recursive: true});
+      writeFileSync(destinationPath, sourceBytes);
     }
   }
 

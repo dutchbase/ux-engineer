@@ -12,7 +12,7 @@ const runFixture = fileURLToPath(new URL("fixtures/run/valid", import.meta.url))
 
 test("bundled CLI runs without node_modules", () => {
   const build = spawnSync("node_modules/.bin/esbuild", [
-    "src/cli.ts", "--bundle", "--platform=node", "--format=esm", "--target=node18", "--outfile=dist/ux.mjs"
+    "src/cli.ts", "--bundle", "--platform=node", "--format=esm", "--target=node18", "--banner:js=#!/usr/bin/env node", "--outfile=dist/ux.mjs"
   ], {cwd: repoRoot, encoding: "utf8"});
   assert.equal(build.status, 0, build.stderr);
   assert.ok(existsSync(join(repoRoot, "dist/ux.mjs")));
