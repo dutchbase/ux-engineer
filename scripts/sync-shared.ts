@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 
 export const sharedFiles = {
@@ -78,7 +78,7 @@ export const sharedFiles = {
 
 // Generated copies that are not skill files: the npx entry point.
 export const extraCopies = [
-  {source: "dist/ux.mjs", destination: "cli/ux-engineer.mjs"}
+  {source: "dist/ux.mjs", destination: "cli/ux-engineer.mjs", executable: true}
 ] as const;
 
 export function syncShared(root: string, opts: {check: boolean}): string[] {
@@ -89,7 +89,7 @@ export function syncShared(root: string, opts: {check: boolean}): string[] {
       sources.map(({source, folder}) => ({source, destination: `skills/${skill}/${folder}/${basename(source)}`}))),
     ...extraCopies
   ];
-  for (const {source, destination} of copies) {
+  for (const {source, destination, ...rest} of copies) {
     if (source === "dist/ux.mjs" && !existsSync(resolve(root, source))) {
       throw new Error("dist/ux.mjs missing: run pnpm build first");
     }
@@ -97,11 +97,15 @@ export function syncShared(root: string, opts: {check: boolean}): string[] {
     const destinationPath = resolve(root, destination);
     const currentBytes = existsSync(destinationPath) ? readFileSync(destinationPath) : null;
 
-    if (currentBytes?.equals(sourceBytes)) continue;
+    if (currentBytes?.equals(sourceBytes)) {
+      if (!opts.check && "executable" in rest) chmodSync(destinationPath, 0o755);
+      continue;
+    }
     outOfDate.push(destination);
     if (!opts.check) {
       mkdirSync(dirname(destinationPath), {recursive: true});
-      writeFileSync(destinationPath, sourceBytes);
+      writeFileSync(destinationPath, sourceBytes, {mode: "executable" in rest ? 0o755 : 0o644});
+      if ("executable" in rest) chmodSync(destinationPath, 0o755);
     }
   }
 

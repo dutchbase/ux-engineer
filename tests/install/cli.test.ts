@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { tempDir } from "./helpers.ts";
+import { runCli, type Io } from "../../src/cli.ts";
+import { tempDir, write } from "./helpers.ts";
 
 const cli = fileURLToPath(new URL("../../src/cli.ts", import.meta.url));
 
@@ -90,4 +91,67 @@ test("global install uses HOME", () => {
   assert.equal(result.status, 0, result.err);
   assert.ok(existsSync(join(d.home, ".claude/skills/ux-orchestrator/SKILL.md")));
   assert.equal(existsSync(join(d.cwd, ".claude")), false);
+});
+
+test("doctor reports an invalid install record and exits 0", () => {
+  const d = dirs();
+  write(join(d.cwd, ".ux-engineer/install.json"), "{not json");
+  const result = run(["doctor"], d);
+  assert.equal(result.status, 0, result.err);
+  assert.match(result.out, /^Install record: invalid \(.+\)$/m);
+});
+
+test("an unrelated plugin.json above the entry point gives the clean exit 2", () => {
+  const d = dirs();
+  const outer = tempDir("outer");
+  write(join(outer, ".claude-plugin/plugin.json"), JSON.stringify({name: "something-else"}));
+  mkdirSync(join(outer, "pkg/cli"), {recursive: true});
+  const copy = join(outer, "pkg/cli/ux-engineer.mjs");
+  copyFileSync(fileURLToPath(new URL("../../cli/ux-engineer.mjs", import.meta.url)), copy);
+  const env: NodeJS.ProcessEnv = {...process.env, HOME: d.home};
+  delete env.NODE_TEST_CONTEXT;
+  const result = spawnSync(process.execPath, [copy, "install", "--dry-run", "--host", "codex"], {cwd: d.cwd, env, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"]});
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /^Run this command from the ux-engineer package/);
+});
+
+test("the OpenCode note shows only when both skill folders are targets", () => {
+  const both = run(["install", "--dry-run", "--host", "claude-code,codex", "--skills", "ux-orchestrator"], dirs());
+  assert.match(both.out, /^Note: OpenCode reads both \.claude\/skills and \.agents\/skills, so it will see two copies\. Use --host to pick one if you use OpenCode\.$/m);
+  const one = run(["install", "--dry-run", "--host", "claude-code", "--skills", "ux-orchestrator"], dirs());
+  assert.doesNotMatch(one.out, /Note: OpenCode/);
+});
+
+function ttyRun(answer: string) {
+  const d = dirs();
+  const io: Io = {isTTY: true, ask: () => answer, show: () => {}, home: d.home, cwd: d.cwd};
+  const result = runCli(["install", "--host", "claude-code", "--skills", "ux-orchestrator"], io);
+  return {result, written: existsSync(join(d.cwd, ".claude/skills/ux-orchestrator/SKILL.md")) || existsSync(join(d.cwd, ".ux-engineer"))};
+}
+
+for (const answer of ["y", "yes", "Y"]) {
+  test(`TTY answer ${JSON.stringify(answer)} applies`, () => {
+    const {result, written} = ttyRun(answer);
+    assert.equal(result.status, 0);
+    assert.ok(written);
+  });
+}
+
+for (const answer of ["n", "", "no", "yy"]) {
+  test(`TTY answer ${JSON.stringify(answer)} cancels with no writes`, () => {
+    const {result, written} = ttyRun(answer);
+    assert.equal(result.status, 0);
+    assert.match(result.output.join("\n"), /Cancelled/);
+    assert.equal(written, false);
+  });
+}
+
+test("TTY uninstall asks too, and cancel keeps files", () => {
+  const d = dirs();
+  const base: Io = {isTTY: true, ask: () => "", show: () => {}, home: d.home, cwd: d.cwd};
+  runCli(["install", "--host", "claude-code", "--skills", "ux-orchestrator", "--yes"], base);
+  runCli(["uninstall"], base);
+  assert.ok(existsSync(join(d.cwd, ".claude/skills/ux-orchestrator/SKILL.md")));
+  runCli(["uninstall"], {...base, ask: () => "y"});
+  assert.equal(existsSync(join(d.cwd, ".claude/skills/ux-orchestrator/SKILL.md")), false);
 });

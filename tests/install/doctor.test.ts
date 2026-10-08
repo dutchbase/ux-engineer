@@ -46,3 +46,22 @@ test("reads the install record and writes nothing", () => {
   write(join(cwd, ".ux-engineer/install.json"), JSON.stringify({version: "1.2.3", installed_at: "x", files: [], backups: []}));
   assert.deepEqual(doctor({sourceRoot, home: tempDir("home"), cwd}).record, {path: join(cwd, ".ux-engineer/install.json"), version: "1.2.3"});
 });
+
+test("claude and agents copies in one project are a duplicate for OpenCode", () => {
+  const sourceRoot = createFakePackage();
+  const cwd = tempDir("cwd");
+  installCopy(join(cwd, ".claude/skills"), "ux-a", {"SKILL.md": "ux-a skill\n"});
+  installCopy(join(cwd, ".agents/skills"), "ux-a", {"SKILL.md": "ux-a skill\n"});
+  assert.deepEqual(doctor({sourceRoot, home: tempDir("home"), cwd}).duplicates, ["ux-a"]);
+});
+
+test("an invalid install record is reported, not thrown", () => {
+  const sourceRoot = createFakePackage();
+  const cwd = tempDir("cwd");
+  write(join(cwd, ".ux-engineer/install.json"), JSON.stringify({version: "1", installed_at: "x", files: [{path: "../evil", sha256: "x"}], backups: []}));
+  const report = doctor({sourceRoot, home: tempDir("home"), cwd});
+  assert.equal(report.record?.path, join(cwd, ".ux-engineer/install.json"));
+  assert.match(report.record?.error ?? "", /invalid record path/);
+  write(join(cwd, ".ux-engineer/install.json"), "{not json");
+  assert.ok(doctor({sourceRoot, home: tempDir("home"), cwd}).record?.error);
+});

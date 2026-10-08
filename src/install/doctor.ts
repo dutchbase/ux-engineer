@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { readRecord, recordPathOf } from "./plan.ts";
 
-export type DoctorReport = { locations: { dir: string; skills: { name: string; matchesPackage: boolean }[] }[]; duplicates: string[]; record: { path: string; version: string } | null };
+export type DoctorReport = { locations: { dir: string; skills: { name: string; matchesPackage: boolean }[] }[]; duplicates: string[]; record: { path: string; version: string; error?: string } | null };
 
 function listFiles(dir: string): string[] {
   return readdirSync(dir, {recursive: true, withFileTypes: true})
@@ -29,7 +29,7 @@ export function doctor(opts: { sourceRoot: string; home: string; cwd: string }):
   const hostGroups = [
     [dirs.projectClaude, dirs.globalClaude],
     [dirs.projectAgents, dirs.globalAgents],
-    [dirs.projectOpencode, dirs.globalOpencode, dirs.projectAgents, dirs.globalAgents]
+    [dirs.projectOpencode, dirs.globalOpencode, dirs.projectAgents, dirs.globalAgents, dirs.projectClaude, dirs.globalClaude]
   ];
 
   const names = new Map<string, string[]>();
@@ -55,6 +55,13 @@ export function doctor(opts: { sourceRoot: string; home: string; cwd: string }):
   }
 
   const recordPath = [cwd, home].map(recordPathOf).find((path) => existsSync(path));
-  const record = recordPath ? {path: recordPath, version: readRecord(recordPath)!.version} : null;
+  let record: DoctorReport["record"] = null;
+  if (recordPath) {
+    try {
+      record = {path: recordPath, version: readRecord(recordPath)!.version};
+    } catch (error) {
+      record = {path: recordPath, version: "", error: error instanceof Error ? error.message : String(error)};
+    }
+  }
   return {locations, duplicates: [...duplicates].sort(), record};
 }

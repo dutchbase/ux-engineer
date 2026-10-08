@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { test } from "node:test";
@@ -45,6 +45,15 @@ test("the npx entry point is a copy of the built helper", () => {
   const root = createFakeRepo();
   syncShared(root, {check: false});
   assert.deepEqual(readFileSync(join(root, "cli/ux-engineer.mjs")), readFileSync(join(root, "dist/ux.mjs")));
+});
+
+test("the npx entry point is executable after sync", () => {
+  const root = createFakeRepo();
+  syncShared(root, {check: false});
+  assert.ok(statSync(join(root, "cli/ux-engineer.mjs")).mode & 0o100);
+  writeFileSync(join(root, "cli/ux-engineer.mjs"), "x", {mode: 0o644});
+  syncShared(root, {check: false});
+  assert.ok(statSync(join(root, "cli/ux-engineer.mjs")).mode & 0o100);
 });
 
 test("written copies preserve source bytes", () => {

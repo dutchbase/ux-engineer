@@ -41,7 +41,7 @@ function parseChecks(file: string): Result<{schema_version: string; run_id: stri
   }
 }
 
-type Io = { isTTY: boolean; ask: (question: string) => string; show: (line: string) => void; home: string; cwd: string };
+export type Io = { isTTY: boolean; ask: (question: string) => string; show: (line: string) => void; home: string; cwd: string };
 
 function defaultIo(): Io {
   return {
@@ -61,15 +61,23 @@ function defaultIo(): Io {
   };
 }
 
-/** The package root: the nearest folder above the running file that holds .claude-plugin/plugin.json. */
+/** The package root: the nearest folder above the running file whose .claude-plugin/plugin.json is named ux-engineer. */
 function findSourceRoot(): string | null {
   let dir = dirname(fileURLToPath(import.meta.url));
-  while (!existsSync(join(dir, ".claude-plugin/plugin.json"))) {
+  while (!isOurPlugin(join(dir, ".claude-plugin/plugin.json"))) {
     const parent = dirname(dir);
     if (parent === dir) return null;
     dir = parent;
   }
   return dir;
+}
+
+function isOurPlugin(file: string): boolean {
+  try {
+    return (JSON.parse(readFileSync(file, "utf8")) as { name?: unknown }).name === "ux-engineer";
+  } catch {
+    return false;
+  }
 }
 
 const hostNames: string[] = ["claude-code", "codex", "opencode"];
@@ -118,7 +126,8 @@ function installerCommand(command: "install" | "uninstall" | "doctor", rest: str
         skills.forEach(({name, matchesPackage}) => output.push(`  ${name}  ${matchesPackage ? "matches package" : "differs from package"}`));
       }
       if (report.duplicates.length > 0) output.push(`Duplicates (a host reads these skills from more than one folder): ${report.duplicates.join(", ")}`);
-      output.push(report.record ? `Install record: ${report.record.path} (version ${report.record.version})` : "Install record: none");
+      const {record} = report;
+      output.push(!record ? "Install record: none" : record.error ? `Install record: invalid (${record.error})` : `Install record: ${record.path} (version ${record.version})`);
       return {status: 0, output, errors: []};
     }
 
@@ -144,11 +153,15 @@ function installerCommand(command: "install" | "uninstall" | "doctor", rest: str
     const hosts = (hostList ?? detectHosts(env)) as Host[];
     if (hosts.length === 0) return failure(2, "No supported host found. Use --host.");
     const skills = typeof values.skills === "string" ? values.skills.split(",").filter(Boolean) : undefined;
-    const plan = planInstall({sourceRoot, root, targets: targetDirs(hosts, values.global ? "global" : "project", env), skills});
+    const targets = targetDirs(hosts, values.global ? "global" : "project", env);
+    const plan = planInstall({sourceRoot, root, targets, skills});
 
     const lines = [`Install ux-engineer ${plan.version} into ${root} (${values.global ? "global" : "project"}, hosts: ${hosts.join(", ")})`,
       ...plan.actions.map((action) => `${action.kind === "skip-identical" ? "skip" : action.kind}  ${rel(action.target)}`),
       ...plan.conflicts.map((conflict) => `conflict  ${rel(conflict.target)}  (${conflict.reason})`)];
+    if (targets.length > 1) {
+      lines.push("Note: OpenCode reads both .claude/skills and .agents/skills, so it will see two copies. Use --host to pick one if you use OpenCode.");
+    }
     if (values["dry-run"]) return {status: 0, output: [...lines, "Dry run: nothing written."], errors: []};
     if (plan.conflicts.length > 0 && !values.force) {
       return {status: 1, output: lines, errors: [`conflicts: ${plan.conflicts.length} files; use --force to overwrite`]};

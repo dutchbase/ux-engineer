@@ -8020,7 +8020,7 @@ var require_dist = __commonJS({
 });
 
 // src/cli.ts
-import { existsSync as existsSync5, readFileSync as readFileSync5, readSync, realpathSync as realpathSync3, writeFileSync as writeFileSync2 } from "node:fs";
+import { readFileSync as readFileSync5, readSync, realpathSync as realpathSync3, writeFileSync as writeFileSync2 } from "node:fs";
 import { homedir } from "node:os";
 import { dirname as dirname3, join as join6 } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8167,7 +8167,7 @@ function doctor(opts) {
   const hostGroups = [
     [dirs.projectClaude, dirs.globalClaude],
     [dirs.projectAgents, dirs.globalAgents],
-    [dirs.projectOpencode, dirs.globalOpencode, dirs.projectAgents, dirs.globalAgents]
+    [dirs.projectOpencode, dirs.globalOpencode, dirs.projectAgents, dirs.globalAgents, dirs.projectClaude, dirs.globalClaude]
   ];
   const names = /* @__PURE__ */ new Map();
   const locations = [];
@@ -8189,7 +8189,14 @@ function doctor(opts) {
     }
   }
   const recordPath = [cwd, home].map(recordPathOf).find((path) => existsSync2(path));
-  const record = recordPath ? { path: recordPath, version: readRecord(recordPath).version } : null;
+  let record = null;
+  if (recordPath) {
+    try {
+      record = { path: recordPath, version: readRecord(recordPath).version };
+    } catch (error) {
+      record = { path: recordPath, version: "", error: error instanceof Error ? error.message : String(error) };
+    }
+  }
   return { locations, duplicates: [...duplicates].sort(), record };
 }
 
@@ -9452,12 +9459,19 @@ function defaultIo() {
 }
 function findSourceRoot() {
   let dir = dirname3(fileURLToPath(import.meta.url));
-  while (!existsSync5(join6(dir, ".claude-plugin/plugin.json"))) {
+  while (!isOurPlugin(join6(dir, ".claude-plugin/plugin.json"))) {
     const parent = dirname3(dir);
     if (parent === dir) return null;
     dir = parent;
   }
   return dir;
+}
+function isOurPlugin(file) {
+  try {
+    return JSON.parse(readFileSync5(file, "utf8")).name === "ux-engineer";
+  } catch {
+    return false;
+  }
 }
 var hostNames = ["claude-code", "codex", "opencode"];
 var failure = (status, message) => ({ status, output: [], errors: [message] });
@@ -9500,7 +9514,8 @@ function installerCommand(command, rest, io) {
         skills2.forEach(({ name, matchesPackage }) => output.push(`  ${name}  ${matchesPackage ? "matches package" : "differs from package"}`));
       }
       if (report.duplicates.length > 0) output.push(`Duplicates (a host reads these skills from more than one folder): ${report.duplicates.join(", ")}`);
-      output.push(report.record ? `Install record: ${report.record.path} (version ${report.record.version})` : "Install record: none");
+      const { record } = report;
+      output.push(!record ? "Install record: none" : record.error ? `Install record: invalid (${record.error})` : `Install record: ${record.path} (version ${record.version})`);
       return { status: 0, output, errors: [] };
     }
     if (command === "uninstall") {
@@ -9526,12 +9541,16 @@ function installerCommand(command, rest, io) {
     const hosts = hostList ?? detectHosts(env);
     if (hosts.length === 0) return failure(2, "No supported host found. Use --host.");
     const skills = typeof values.skills === "string" ? values.skills.split(",").filter(Boolean) : void 0;
-    const plan = planInstall({ sourceRoot, root, targets: targetDirs(hosts, values.global ? "global" : "project", env), skills });
+    const targets = targetDirs(hosts, values.global ? "global" : "project", env);
+    const plan = planInstall({ sourceRoot, root, targets, skills });
     const lines = [
       `Install ux-engineer ${plan.version} into ${root} (${values.global ? "global" : "project"}, hosts: ${hosts.join(", ")})`,
       ...plan.actions.map((action) => `${action.kind === "skip-identical" ? "skip" : action.kind}  ${rel(action.target)}`),
       ...plan.conflicts.map((conflict) => `conflict  ${rel(conflict.target)}  (${conflict.reason})`)
     ];
+    if (targets.length > 1) {
+      lines.push("Note: OpenCode reads both .claude/skills and .agents/skills, so it will see two copies. Use --host to pick one if you use OpenCode.");
+    }
     if (values["dry-run"]) return { status: 0, output: [...lines, "Dry run: nothing written."], errors: [] };
     if (plan.conflicts.length > 0 && !values.force) {
       return { status: 1, output: lines, errors: [`conflicts: ${plan.conflicts.length} files; use --force to overwrite`] };
