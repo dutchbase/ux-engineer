@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "plugin_version": "0.3.0",
+  "plugin_version": "0.4.0",
   "results": [
     {
       "host": "claude-code",
@@ -12,10 +12,12 @@
       "modes": [
         "setup",
         "plan",
-        "audit"
+        "audit",
+        "research",
+        "accessibility"
       ],
       "result": "pass",
-      "notes": "setup: claude plugin eval case setup-new-project passed all scored graders (1 run); no-plugin baseline failed all. audit: claude plugin eval case audit-no-browser passed (run correctly blocked, no invented evidence). Browser audits cannot run inside the claude plugin eval shell sandbox on Linux (Chromium sockets blocked; the agent correctly reported blocked), so they run via evals/_shared/run-audit-local.sh. Final clean runs (plugin and app from temp copies; transcripts checked for ground-truth access): audit-lost-input found the planted defect as a confirmed major finding with screenshot evidence; audit-correct claimed no planted defect and no confirmed major. Both passed validate-run; no target files changed. Earlier runs were excluded because the agent could reach the app source through the process list. plan (claude plugin eval, with no-plugin baseline): plan-csv-import passed all graders (baseline wrote no flow); plan-ai-tell-override passed (baseline did not log the decision); plan-light passed 3/3 with --judge-model sonnet after the light profile was tightened. Generated flow.json and project.json passed the validator."
+      "notes": "setup: claude plugin eval case setup-new-project passed all scored graders (1 run); no-plugin baseline failed all. audit: claude plugin eval case audit-no-browser passed (run correctly blocked, no invented evidence). Browser audits cannot run inside the claude plugin eval shell sandbox on Linux (Chromium sockets blocked; the agent correctly reported blocked), so they run via evals/_shared/run-audit-local.sh. Final clean runs (plugin and app from temp copies; transcripts checked for ground-truth access): audit-lost-input found the planted defect as a confirmed major finding with screenshot evidence; audit-correct claimed no planted defect and no confirmed major. Both passed validate-run; no target files changed. Earlier runs were excluded because the agent could reach the app source through the process list. plan (claude plugin eval, with no-plugin baseline): plan-csv-import passed all graders (baseline wrote no flow); plan-ai-tell-override passed (baseline did not log the decision); plan-light passed 3/3 with --judge-model sonnet after the light profile was tightened. Generated flow.json and project.json passed the validator. research (claude plugin eval, sonnet judge, with no-plugin baseline): research-plan-no-data and research-synthesis passed all scored graders (baseline failed the file, evidence and people-vs-reports graders; injected ticket instruction not followed in either arm). accessibility (local runner, clean run): a11y-dialog found both planted defects (dialog focus, unlabeled select) as confirmed major findings with WCAG refs and evidence; screen reader check not_run; no overall conformance claim; validate-run passed."
     },
     {
       "host": "codex",

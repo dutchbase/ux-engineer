@@ -12,7 +12,7 @@ This file lists what UX Engineer does not do or cannot guarantee. It is updated 
 - Nothing has been benchmarked yet. There is no evidence yet that the plugin improves on using no plugin or an existing alternative.
 - `ux-research` does no user research. It plans studies, summarizes data you supply and cites web pages it read. Web research and a few tickets are weak evidence, and the skill labels them so.
 - `ux-accessibility` has so far only been exercised against one small test app with two planted defects. It uses axe and keyboard checks. It does not use a screen reader, so screen reader checks stay `not_run`. Its results are not a WCAG conformance statement.
-- The `research-*` and `a11y-dialog` cases are written but have not been run yet. `a11y-dialog` runs through the local runner, like the other browser cases.
+- The `research-*` and `a11y-dialog` cases ran once each (see `compatibility.json`); this is not a benchmark. `a11y-dialog` runs through the local runner, like the other browser cases.
 
 ## By design
 
