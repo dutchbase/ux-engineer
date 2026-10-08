@@ -10,10 +10,9 @@ This file lists what UX Engineer does not do or cannot guarantee. It is updated 
 - Tested so far: Claude Code (setup and audit, see `compatibility.json`) and Codex (skill discovery only). Each case ran only a few times; this is not a benchmark.
 - The test app's `correct` variant is the reference for the four planted defects, not a defect-free app. Audits found real extra problems in it; they are listed in `evals/ground-truth/import-app.json` and in the test app's README.
 - Nothing has been benchmarked yet. There is no evidence yet that the plugin improves on using no plugin or an existing alternative.
-
 - `ux-research` does no user research. It plans studies, summarizes data you supply and cites web pages it read. Web research and a few tickets are weak evidence, and the skill labels them so.
-- `ux-accessibility` is tested on one small test app with two planted defects. It uses axe and keyboard checks. It does not use a screen reader, so screen reader checks stay `not_run`. Its results are not a WCAG conformance statement.
-- The `research-*` and `a11y-dialog` cases ran only a few times and are not a benchmark. `a11y-dialog` runs through the local runner, like the other browser cases.
+- `ux-accessibility` has so far only been exercised against one small test app with two planted defects. It uses axe and keyboard checks. It does not use a screen reader, so screen reader checks stay `not_run`. Its results are not a WCAG conformance statement.
+- The `research-*` and `a11y-dialog` cases are written but have not been run yet. `a11y-dialog` runs through the local runner, like the other browser cases.
 
 ## By design
 
