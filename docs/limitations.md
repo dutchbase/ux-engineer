@@ -5,7 +5,7 @@ This file lists what UX Engineer does not do or cannot guarantee. It is updated 
 ## Current status
 
 - Early development. `ux-setup`, `ux-plan` (with `ux-flow-design`), `ux-audit`, `ux-research`, `ux-accessibility`, `ux-verify` and the router `ux-orchestrator` exist and are experimental.
-- The skills validate their output with the bundled `scripts/ux.mjs`, which needs Node 18 or newer. Without Node, they fall back to a reading check and say that the output was not machine-validated.
+- The skills validate their output with the bundled `scripts/ux.mjs`, which needs Node 20.12 or newer (it uses `Dirent.parentPath`). The installer has the same floor. The repository CI runs on Node 24 only. Without Node, they fall back to a reading check and say that the output was not machine-validated.
 - Browser audits cannot run inside `claude plugin eval` on Linux: its shell sandbox blocks the sockets Chromium needs, and the agent correctly reports the run as `blocked`. Browser audit cases are run with `evals/_shared/run-audit-local.sh` instead, outside that sandbox.
 - Tested so far: Claude Code (setup, plan, audit, research, accessibility and routing, see `compatibility.json`). Codex and OpenCode: installer and skill discovery only. Each case ran only a few times; this is not a benchmark.
 - The test app's `correct` variant is the reference for the planted defects, not a defect-free app. Audits found real extra problems in it; they are listed in `evals/ground-truth/import-app.json` and in the test app's README.
@@ -29,6 +29,9 @@ This file lists what UX Engineer does not do or cannot guarantee. It is updated 
 - OpenCode reads both `.claude/skills` and `.agents/skills`. Installing for more than one host can show the skills twice there.
 - The `npx github:dutchbase/ux-engineer` form was not tested on 2026-10-08; check it after merge. The tested route was `npm pack`, then `npx --package=<tarball> ux-engineer doctor`.
 - Only a project install for all three hosts was run on real hosts; `--global`, `--force` and `--skills` are covered by unit tests only.
+- A second `--force` on the same file makes a second backup, but `uninstall` restores only the first (oldest) backup.
+- A `.claude/skills` folder that is a symlink pointing inside the project is followed, and the skills are written there.
+- OpenCode discovery was tested only with both `.claude/skills` and `.agents/skills` present.
 - Tested on Linux (x86_64) only. Windows and macOS are untested.
 
 ## By design

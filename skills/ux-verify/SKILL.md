@@ -112,7 +112,8 @@ Never write "WCAG compliant" or "accessible".
 - Make a finding only for a failed criterion. Put the `ac_id` in
   `criterion_refs`, with the `wcag_refs` when present. Set `flow_id` to the
   flow id.
-- Use basis `observed` or `measured`, status `confirmed`, and the evidence IDs.
+- Use basis `observed` or `measured`, or `user_reported` for a manual result.
+  Use status `confirmed` and the evidence IDs.
   Put the Then in `expected_result` and the real result in `actual_result`.
 - Do not look for other problems. If you see an unrelated problem on the way,
   do not add a finding. Add a line to `run.limitations`:
@@ -122,9 +123,11 @@ Never write "WCAG compliant" or "accessible".
 
 ## Status
 
-Set `scope` to `targeted`. Add one `coverage` row for each browser criterion:
-`task` is the `ac_id`, plus the `viewport` used, the `state`, and the
-`input_method`. Set `run.requested_checks` to exactly the check IDs in `checks.json`. Derive
+Set `scope` to `targeted`. Add one `coverage` row for each browser criterion.
+Each row needs all 8 fields: `task` (the `ac_id`), `persona_id` (or `null`),
+`viewport` in `WxH` form (for example `390x844`), `state`, `input_method`
+(`pointer`, `touch` or `keyboard`), `locale` (or `null`), `tested`, and
+`reason` (or `null`). Set `run.requested_checks` to exactly the check IDs in `checks.json`. Derive
 `status` as follows. Do not change it.
 
 - A blocker means `blocked`.

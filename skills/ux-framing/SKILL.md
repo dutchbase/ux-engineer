@@ -1,6 +1,6 @@
 ---
 name: ux-framing
-description: Frame a product or UX task around real users, jobs, context, evidence, and observable success. Use for "create personas", "who are the users", "frame this UX problem", or before planning a substantial interface change. Do not use for small styling changes, isolated copy edits, or routine application coding.
+description: Internal helper that frames a product or UX task around real users, jobs, context, evidence, and observable success. Invoked by ux-setup or ux-plan, not directly. Do not use for direct requests such as "create personas" or "who are the users" (use ux-setup), small styling changes, isolated copy edits, or routine application coding.
 license: MIT
 ---
 

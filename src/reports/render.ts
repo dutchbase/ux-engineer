@@ -61,7 +61,7 @@ function renderMarkdown(bundle: RunBundle): string {
   const evidenceById = new Map(evidence.items.map((item) => [item.evidence_id, item]));
   const coverage = run.coverage.map((row) => `| ${markdown(row.task)} | ${markdown(row.persona_id)} | ${markdown(row.viewport)} | ${markdown(row.state)} | ${markdown(row.input_method)} | ${row.tested ? "Tested" : "Not tested"} | ${markdown(row.reason)} |`).join("\n");
   const findingRows = sortedFindings(findings.findings).map((finding) => `| ${markdown(finding.finding_id)} | ${markdown(finding.severity)} | ${markdown(finding.status)} | ${markdown(finding.title)} | ${markdown(finding.user_impact)} | ${evidenceText(finding.evidence_ids, evidenceById)} |`).join("\n");
-  const checkRows = checks.checks.map((check) => `| ${markdown(check.check_id)} | ${markdown(check.required ? "required" : "optional")} | ${markdown(check.result)} | ${evidenceText(check.evidence_ids, evidenceById)} |`).join("\n");
+  const checkRows = checks.checks.map((check) => `| ${markdown(check.check_id)} | ${markdown(check.required ? "required" : "not required")} | ${markdown(check.result)} | ${evidenceText(check.evidence_ids, evidenceById)} |`).join("\n");
   const nextSteps = findings.findings.filter((finding) => finding.status === "confirmed").map((finding) => `- ${markdown(finding.finding_id)}: ${markdown(finding.recommendation)}`).join("\n") || "- None";
 
   return `# UX run report: ${markdown(run.run_id)}
@@ -122,7 +122,7 @@ function renderHtml(bundle: RunBundle): string {
   const evidenceById = new Map(evidence.items.map((item) => [item.evidence_id, item]));
   const coverage = run.coverage.map((row) => `<tr><td>${html(row.task)}</td><td>${html(row.persona_id)}</td><td>${html(row.viewport)}</td><td>${html(row.state)}</td><td>${html(row.input_method)}</td><td>${row.tested ? "Tested" : "Not tested"}</td><td>${html(row.reason)}</td></tr>`).join("");
   const findingRows = sortedFindings(findings.findings).map((finding) => `<tr><td>${html(finding.finding_id)}</td><td>${html(finding.severity)}</td><td>${html(finding.status)}</td><td>${html(finding.title)}</td><td>${html(finding.user_impact)}</td><td>${evidenceHtml(finding.evidence_ids, evidenceById)}</td></tr>`).join("");
-  const checkRows = checks.checks.map((check) => `<tr><td>${html(check.check_id)}</td><td>${html(check.required ? "required" : "optional")}</td><td>${html(check.result)}</td><td>${evidenceHtml(check.evidence_ids, evidenceById)}</td></tr>`).join("");
+  const checkRows = checks.checks.map((check) => `<tr><td>${html(check.check_id)}</td><td>${html(check.required ? "required" : "not required")}</td><td>${html(check.result)}</td><td>${evidenceHtml(check.evidence_ids, evidenceById)}</td></tr>`).join("");
   const list = (values: string[]) => values.length === 0 ? "<li>None</li>" : values.map((value) => `<li>${html(value)}</li>`).join("");
   const nextSteps = findings.findings.filter((finding) => finding.status === "confirmed").map((finding) => `<li><strong>${html(finding.finding_id)}</strong>: ${html(finding.recommendation)}</li>`).join("") || "<li>None</li>";
 

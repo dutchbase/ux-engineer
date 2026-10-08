@@ -126,8 +126,10 @@ function installerCommand(command: "install" | "uninstall" | "doctor", rest: str
         skills.forEach(({name, matchesPackage}) => output.push(`  ${name}  ${matchesPackage ? "matches package" : "differs from package"}`));
       }
       if (report.duplicates.length > 0) output.push(`Duplicates (a host reads these skills from more than one folder): ${report.duplicates.join(", ")}`);
-      const {record} = report;
-      output.push(!record ? "Install record: none" : record.error ? `Install record: invalid (${record.error})` : `Install record: ${record.path} (version ${record.version})`);
+      if (report.records.length === 0) output.push("Install record: none");
+      for (const record of report.records) {
+        output.push(record.error ? `Install record: invalid (${record.error})` : `Install record: ${record.path} (version ${record.version})`);
+      }
       return {status: 0, output, errors: []};
     }
 
@@ -171,7 +173,7 @@ function installerCommand(command: "install" | "uninstall" | "doctor", rest: str
     applyInstall(plan, {force: Boolean(values.force), now: () => new Date()});
     const count = (kind: string) => plan.actions.filter((action) => action.kind === kind).length;
     output.push(`${count("create")} created, ${count("update")} updated, ${count("skip-identical")} unchanged, ${plan.conflicts.length} overwritten (backups in .ux-engineer/backup/).`,
-      "Run /ux-engineer:ux-setup (Claude Code) or $ux-setup (Codex) in this project.",
+      "Run /ux-setup (Claude Code) or $ux-setup (Codex) in this project.",
       "Suggested AGENTS.md line (not written): Read docs/ux/ before any UI or UX work.");
     return {status: 0, output, errors: []};
   } catch (error) {

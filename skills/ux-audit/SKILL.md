@@ -1,6 +1,6 @@
 ---
 name: ux-audit
-description: Use when the user asks to audit a page or flow, check the UX of a product, test onboarding in a browser, investigate a usability problem, or verify a user task. Do not use for implementing fixes, small styling tweaks, pure visual taste, or routine application coding.
+description: Use when the user asks to audit a page or flow, check the UX of a product, test onboarding in a browser, investigate a usability problem, or test whether a user can complete a task. Do not use for implementing fixes, small styling tweaks, pure visual taste, or routine application coding.
 license: MIT
 ---
 

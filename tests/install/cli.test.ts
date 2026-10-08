@@ -50,7 +50,8 @@ test("install --yes, doctor, then uninstall --yes", () => {
   const d = dirs();
   const install = run(["install", "--host", "claude-code", "--yes", "--skills", "ux-orchestrator"], d);
   assert.equal(install.status, 0, install.err);
-  assert.match(install.out, /Run \/ux-engineer:ux-setup \(Claude Code\) or \$ux-setup \(Codex\) in this project\./);
+  assert.match(install.out, /Run \/ux-setup \(Claude Code\) or \$ux-setup \(Codex\) in this project\./);
+  assert.doesNotMatch(install.out, /ux-engineer:ux-setup/);
   assert.match(install.out, /Read docs\/ux\/ before any UI or UX work\./);
   assert.ok(existsSync(join(d.cwd, ".claude/skills/ux-orchestrator/SKILL.md")));
   assert.ok(existsSync(join(d.cwd, ".ux-engineer/install.json")));
@@ -99,6 +100,17 @@ test("doctor reports an invalid install record and exits 0", () => {
   const result = run(["doctor"], d);
   assert.equal(result.status, 0, result.err);
   assert.match(result.out, /^Install record: invalid \(.+\)$/m);
+});
+
+test("doctor prints both project and global install records", () => {
+  const d = dirs();
+  const record = (version: string) => JSON.stringify({version, installed_at: "x", files: [], backups: []});
+  write(join(d.cwd, ".ux-engineer/install.json"), record("1.0.0"));
+  write(join(d.home, ".ux-engineer/install.json"), record("2.0.0"));
+  const result = run(["doctor"], d);
+  assert.equal(result.status, 0, result.err);
+  assert.match(result.out, /^Install record: .*\.ux-engineer\/install\.json \(version 1\.0\.0\)$/m);
+  assert.match(result.out, /^Install record: .*\.ux-engineer\/install\.json \(version 2\.0\.0\)$/m);
 });
 
 test("an unrelated plugin.json above the entry point gives the clean exit 2", () => {

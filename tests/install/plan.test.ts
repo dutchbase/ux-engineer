@@ -155,6 +155,16 @@ test("crafted record path is refused when planning", () => {
   assert.throws(() => planInstall({sourceRoot, root, targets: [join(root, ".claude/skills")]}), /invalid record path/);
 });
 
+test("record without files or backups arrays is refused", () => {
+  const sourceRoot = createFakePackage();
+  for (const record of [{version: "1", backups: []}, {version: "1", files: [], backups: "x"}]) {
+    const root = tempDir("project");
+    const recordPath = join(root, ".ux-engineer/install.json");
+    write(recordPath, JSON.stringify(record));
+    assert.throws(() => planInstall({sourceRoot, root, targets: [join(root, ".claude/skills")]}), {message: `invalid install record: ${recordPath}`});
+  }
+});
+
 test("in-root name starting with two dots is inside root", () => {
   const root = tempDir("project");
   assert.doesNotThrow(() => assertInsideRoot(root, join(root, "..foo")));

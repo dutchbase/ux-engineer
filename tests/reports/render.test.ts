@@ -52,3 +52,16 @@ test("HTML renderer escapes JSON strings and stays self-contained", async () => 
   assert.equal(html, renderReport(bundle, "html"));
   assert.equal((await readFile(`${validRun}/artifacts/screen.txt`, "utf8")).trim(), "UX evidence");
 });
+
+test("non-required checks are labelled not required", () => {
+  const result = validateRunDir(validRun);
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  const bundle = structuredClone(result.data);
+  bundle.checks.checks[0].required = false;
+  for (const format of ["md", "html"] as const) {
+    const out = renderReport(bundle, format);
+    assert.match(out, /not required/);
+    assert.doesNotMatch(out, /optional/);
+  }
+});

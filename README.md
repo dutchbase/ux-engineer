@@ -14,6 +14,8 @@ Claude Code:
 /plugin install ux-engineer@ux-engineer
 ```
 
+With the plugin, Claude Code commands carry the plugin prefix: `/ux-engineer:ux-setup`, `/ux-engineer:ux-plan` and so on. The commands below use the short form `/ux-setup`, which is what you type after an installer install.
+
 Claude desktop or claude.ai: open Customize, then Plugins, then Add marketplace, and enter `dutchbase/ux-engineer`. (Not tested yet.)
 
 Codex:
@@ -38,13 +40,13 @@ This form is untested until this release is merged; the tested form is `npx --ye
 - Do not use the installer for Claude Code if you installed the plugin. You get every skill twice. `doctor` does not see plugin installs.
 - `npx github:dutchbase/ux-engineer uninstall --yes` removes what the installer wrote. `npx github:dutchbase/ux-engineer doctor` checks installed copies against the package.
 
-Then, in your project:
+Then, in your project (with the plugin in Claude Code, add the `ux-engineer:` prefix):
 
-- `/ux-engineer:ux-setup` (Claude) or `$ux-setup` (Codex) interviews you about your users and writes `docs/ux/project.json`. For a long interview, install [Brainstormform](https://github.com/dutchbase/Brainstormform) first; without it, the plugin asks its questions in the chat.
-- `/ux-engineer:ux-plan <feature>` or `$ux-plan` designs the flow for a feature: steps, error and recovery states, UX copy in your tone, and acceptance criteria your coding agent can test. It writes `docs/ux/flows/<flow-id>.json` and a readable `.md` next to it. A tiny change gets a short answer and no files.
-- `/ux-engineer:ux-audit` or `$ux-audit` walks through a task in your running app (local, staging or preview) in a real browser, at phone, tablet, laptop and wide-screen sizes. It writes findings with screenshots as evidence and a Markdown and HTML report to `.ux/runs/`. It uses your agent's browser tool, or the [Playwright CLI](https://github.com/microsoft/playwright-cli) if there is none, and it needs Node 18 or newer.
-- `/ux-engineer:ux-research <question>` or `$ux-research` looks up best practices on the web, summarizes tickets, interviews or notes you supply, or writes a plan for a study when no data exists. It writes `docs/ux/research/<research-id>.json` and a readable `.md`. It counts people and reports separately, never invents quotes, and does not replace research with real users.
-- `/ux-engineer:ux-accessibility` or `$ux-accessibility` writes testable WCAG 2.2 AA acceptance criteria for a design, or checks a running app with keyboard checks and axe in a browser. Results go to `.ux/runs/`. A clean scan is never reported as "accessible" or "compliant". It is not a certification, and checks that did not run stay `not_run`.
+- `/ux-setup` (Claude Code) or `$ux-setup` (Codex) interviews you about your users and writes `docs/ux/project.json`. For a long interview, install [Brainstormform](https://github.com/dutchbase/Brainstormform) first; without it, the plugin asks its questions in the chat.
+- `/ux-plan <feature>` or `$ux-plan` designs the flow for a feature: steps, error and recovery states, UX copy in your tone, and acceptance criteria your coding agent can test. It writes `docs/ux/flows/<flow-id>.json` and a readable `.md` next to it. A tiny change gets a short answer and no files.
+- `/ux-audit` or `$ux-audit` walks through a task in your running app (local, staging or preview) in a real browser, at phone, tablet, laptop and wide-screen sizes. It writes findings with screenshots as evidence and a Markdown and HTML report to `.ux/runs/`. It uses your agent's browser tool, or the [Playwright CLI](https://github.com/microsoft/playwright-cli) if there is none, and it needs Node 20.12 or newer.
+- `/ux-research <question>` or `$ux-research` looks up best practices on the web, summarizes tickets, interviews or notes you supply, or writes a plan for a study when no data exists. It writes `docs/ux/research/<research-id>.json` and a readable `.md`. It counts people and reports separately, never invents quotes, and does not replace research with real users.
+- `/ux-accessibility` or `$ux-accessibility` writes testable WCAG 2.2 AA acceptance criteria for a design, or checks a running app with keyboard checks and axe in a browser. Results go to `.ux/runs/`. A clean scan is never reported as "accessible" or "compliant". It is not a certification, and checks that did not run stay `not_run`.
 
 ## Why
 
@@ -92,15 +94,15 @@ One repository, one copy of each skill, thin adapters per host. Details are in [
 ## How it will work
 
 ```text
-/ux-engineer:ux-setup
+/ux-setup
   → interviews you about your users, links your design system,
     writes docs/ux/project.json
 
-/ux-engineer:ux-plan the CSV import
+/ux-plan the CSV import
   → flow with error and recovery paths, acceptance criteria,
     handed to your coding agent
 
-/ux-engineer:ux-audit the onboarding on staging
+/ux-audit the onboarding on staging
   → browser walkthrough at four screen sizes,
     findings with evidence, report in Markdown and HTML
 ```

@@ -1,4 +1,4 @@
-import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 
 export const sharedFiles = {
@@ -97,15 +97,18 @@ export function syncShared(root: string, opts: {check: boolean}): string[] {
     const destinationPath = resolve(root, destination);
     const currentBytes = existsSync(destinationPath) ? readFileSync(destinationPath) : null;
 
+    const executable = "executable" in rest;
     if (currentBytes?.equals(sourceBytes)) {
-      if (!opts.check && "executable" in rest) chmodSync(destinationPath, 0o755);
+      if (!executable || statSync(destinationPath).mode & 0o100) continue;
+      if (opts.check) outOfDate.push(destination);
+      else chmodSync(destinationPath, 0o755);
       continue;
     }
     outOfDate.push(destination);
     if (!opts.check) {
       mkdirSync(dirname(destinationPath), {recursive: true});
-      writeFileSync(destinationPath, sourceBytes, {mode: "executable" in rest ? 0o755 : 0o644});
-      if ("executable" in rest) chmodSync(destinationPath, 0o755);
+      writeFileSync(destinationPath, sourceBytes, {mode: executable ? 0o755 : 0o644});
+      if (executable) chmodSync(destinationPath, 0o755);
     }
   }
 

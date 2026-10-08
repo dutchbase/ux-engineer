@@ -80,6 +80,7 @@ export function isSkillFilePath(path: string): boolean {
 export function readRecord(recordPath: string): InstallRecord | null {
   if (!existsSync(recordPath)) return null;
   const record = JSON.parse(readFileSync(recordPath, "utf8")) as InstallRecord;
+  if (!Array.isArray(record?.files) || !Array.isArray(record?.backups)) throw new Error(`invalid install record: ${recordPath}`);
   const bad = [
     ...record.files.filter((file) => !isSkillFilePath(file.path)).map((file) => file.path),
     ...record.backups.filter((entry) => !isSkillFilePath(entry.path)).map((entry) => entry.path),

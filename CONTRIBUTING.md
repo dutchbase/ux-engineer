@@ -4,7 +4,7 @@ Thanks for your interest in UX Engineer.
 
 ## Project status
 
-The project is in the **design phase**. There is no installable plugin yet. The best ways to help right now:
+The project is in **early development**. The plugin is experimental but installable (plugin marketplace or the `npx` installer, see the [README](README.md)). The best ways to help right now:
 
 - Read [`docs/design.md`](docs/design.md) and open an issue when something is unclear, wrong or missing.
 - Share real examples of poor UX that coding agents produced (screenshots or short descriptions, with private data removed).

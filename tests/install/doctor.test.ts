@@ -19,7 +19,7 @@ test("lists ux-* skills and compares bytes with the package", () => {
   const report = doctor({sourceRoot, home, cwd});
   assert.deepEqual(report.locations, [{dir, skills: [{name: "ux-a", matchesPackage: true}, {name: "ux-b", matchesPackage: false}]}]);
   assert.deepEqual(report.duplicates, []);
-  assert.equal(report.record, null);
+  assert.deepEqual(report.records, []);
 });
 
 test("an extra file in the installed skill is a mismatch", () => {
@@ -44,7 +44,7 @@ test("reads the install record and writes nothing", () => {
   const sourceRoot = createFakePackage();
   const cwd = tempDir("cwd");
   write(join(cwd, ".ux-engineer/install.json"), JSON.stringify({version: "1.2.3", installed_at: "x", files: [], backups: []}));
-  assert.deepEqual(doctor({sourceRoot, home: tempDir("home"), cwd}).record, {path: join(cwd, ".ux-engineer/install.json"), version: "1.2.3"});
+  assert.deepEqual(doctor({sourceRoot, home: tempDir("home"), cwd}).records, [{path: join(cwd, ".ux-engineer/install.json"), version: "1.2.3"}]);
 });
 
 test("claude and agents copies in one project are a duplicate for OpenCode", () => {
@@ -60,8 +60,20 @@ test("an invalid install record is reported, not thrown", () => {
   const cwd = tempDir("cwd");
   write(join(cwd, ".ux-engineer/install.json"), JSON.stringify({version: "1", installed_at: "x", files: [{path: "../evil", sha256: "x"}], backups: []}));
   const report = doctor({sourceRoot, home: tempDir("home"), cwd});
-  assert.equal(report.record?.path, join(cwd, ".ux-engineer/install.json"));
-  assert.match(report.record?.error ?? "", /invalid record path/);
+  assert.equal(report.records[0]?.path, join(cwd, ".ux-engineer/install.json"));
+  assert.match(report.records[0]?.error ?? "", /invalid record path/);
   write(join(cwd, ".ux-engineer/install.json"), "{not json");
-  assert.ok(doctor({sourceRoot, home: tempDir("home"), cwd}).record?.error);
+  assert.ok(doctor({sourceRoot, home: tempDir("home"), cwd}).records[0]?.error);
+});
+
+test("reports both project and global records", () => {
+  const sourceRoot = createFakePackage();
+  const cwd = tempDir("cwd");
+  const home = tempDir("home");
+  write(join(cwd, ".ux-engineer/install.json"), JSON.stringify({version: "1.0.0", installed_at: "x", files: [], backups: []}));
+  write(join(home, ".ux-engineer/install.json"), JSON.stringify({version: "2.0.0", installed_at: "x", files: [], backups: []}));
+  assert.deepEqual(doctor({sourceRoot, home, cwd}).records, [
+    {path: join(cwd, ".ux-engineer/install.json"), version: "1.0.0"},
+    {path: join(home, ".ux-engineer/install.json"), version: "2.0.0"}
+  ]);
 });

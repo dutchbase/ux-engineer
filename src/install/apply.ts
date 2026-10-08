@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmdirSync, unlinkSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, linkSync, mkdirSync, readdirSync, readFileSync, renameSync, rmdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { assertInsideRoot, assertSafeSkillFile, readRecord, recordPathOf, relativeToRoot, sha256, type InstallPlan, type InstallRecord,
   type RecordedFile } from "./plan.ts";
@@ -54,8 +54,7 @@ export function applyInstall(plan: InstallPlan, opts: { force: boolean; now: () 
       const {source, target} = write;
       const bytes = readFileSync(source);
       mkdirSync(dirname(target), {recursive: true});
-      // "wx" fails if a create target appeared after the check above, so a new user file is never overwritten.
-      writeFileSync(target, bytes, {flag: "kind" in write && write.kind === "create" ? "wx" : "w"});
+      writeAtomic(target, bytes, "kind" in write && write.kind === "create");
       files.set(relativeToRoot(root, target), sha256(bytes));
     }
     // skip-identical files not in the record stay unrecorded: we did not create them, so uninstall must not delete them.
@@ -63,6 +62,27 @@ export function applyInstall(plan: InstallPlan, opts: { force: boolean; now: () 
     record = saveRecord(plan, previous, files, backups, opts.now);
   }
   return record;
+}
+
+/**
+ * Writes a temp file next to the target, then swaps it in. A hard-linked target is replaced,
+ * so the linked file elsewhere keeps its bytes. For a create, linkSync fails if the target
+ * appeared after the plan check, so a new user file is never overwritten.
+ */
+function writeAtomic(target: string, bytes: Buffer, create: boolean): void {
+  const temp = `${target}.ux-engineer-tmp-${process.pid}`;
+  rmSync(temp, {force: true});
+  writeFileSync(temp, bytes, {flag: "wx"});
+  try {
+    if (create) {
+      linkSync(temp, target);
+      unlinkSync(temp);
+    } else {
+      renameSync(temp, target);
+    }
+  } finally {
+    rmSync(temp, {force: true});
+  }
 }
 
 function saveRecord(plan: InstallPlan, previous: InstallRecord | null, files: Map<string, string>,

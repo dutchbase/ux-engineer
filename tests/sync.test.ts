@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdtempSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { test } from "node:test";
@@ -54,6 +54,15 @@ test("the npx entry point is executable after sync", () => {
   writeFileSync(join(root, "cli/ux-engineer.mjs"), "x", {mode: 0o644});
   syncShared(root, {check: false});
   assert.ok(statSync(join(root, "cli/ux-engineer.mjs")).mode & 0o100);
+});
+
+test("check reports a non-executable npx entry point", () => {
+  const root = createFakeRepo();
+  syncShared(root, {check: false});
+  chmodSync(join(root, "cli/ux-engineer.mjs"), 0o644);
+  assert.deepEqual(syncShared(root, {check: true}), ["cli/ux-engineer.mjs"]);
+  syncShared(root, {check: false});
+  assert.deepEqual(syncShared(root, {check: true}), []);
 });
 
 test("written copies preserve source bytes", () => {

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, linkSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { planInstall } from "../../src/install/plan.ts";
@@ -166,4 +166,16 @@ test("uninstall finishes when a backup file is missing", () => {
   assert.deepEqual(result.restored, []);
   assert.equal(result.removed.length, 3);
   assert.equal(existsSync(join(root, ".ux-engineer/install.json")), false);
+});
+
+test("forced write replaces a hard-linked target and leaves the linked file alone", () => {
+  const sourceRoot = createFakePackage();
+  const root = tempDir("project");
+  const outside = join(tempDir("outside"), "user.md");
+  write(outside, "user bytes\n");
+  mkdirSync(join(root, ".claude/skills/ux-a"), {recursive: true});
+  linkSync(outside, join(root, ".claude/skills/ux-a/SKILL.md"));
+  applyInstall(planInstall({sourceRoot, root, targets: [join(root, ".claude/skills")]}), {force: true, now});
+  assert.equal(readFileSync(outside, "utf8"), "user bytes\n");
+  assert.equal(readFileSync(join(root, ".claude/skills/ux-a/SKILL.md"), "utf8"), "ux-a skill\n");
 });

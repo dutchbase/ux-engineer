@@ -467,7 +467,7 @@ For hosts or setups without a plugin marketplace (OpenCode, or teams that want s
 - Proposes the `AGENTS.md` pointer to `docs/ux/` as a diff ([§6.1](#61-location-and-content)).
 - A `curl` one-liner, if offered, only downloads and runs a pinned, checksummed release of the same installer, never a moving branch.
 
-What shipped in 0.5.0: `npx github:dutchbase/ux-engineer install|uninstall|doctor`. It copies skill folders and makes no symlinks. There is no `curl` one-liner in this release. It writes a record of what it installed, so `uninstall` removes only its own files. Not shipped in 0.5.0: symlinks, a curl one-liner, an AGENTS.md diff (the installer prints the suggested line instead). Details and limits are in [`limitations.md`](limitations.md).
+What shipped in 0.5.0: `npx github:dutchbase/ux-engineer install|uninstall|doctor`. It copies skill folders and makes no symlinks. There is no `curl` one-liner in this release. It writes a record of what it installed, so `uninstall` removes only its own files. Not shipped in 0.5.0: symlinks, a curl one-liner, an AGENTS.md diff (the installer prints the suggested line instead), a question about which hosts to install for (it uses all detected hosts, or `--host`), and an OpenCode-only `.opencode/skills` target. Details and limits are in [`limitations.md`](limitations.md).
 
 ## 8.4 Project instructions
 

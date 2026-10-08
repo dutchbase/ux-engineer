@@ -8086,6 +8086,7 @@ function isSkillFilePath(path) {
 function readRecord(recordPath) {
   if (!existsSync(recordPath)) return null;
   const record = JSON.parse(readFileSync(recordPath, "utf8"));
+  if (!Array.isArray(record?.files) || !Array.isArray(record?.backups)) throw new Error(`invalid install record: ${recordPath}`);
   const bad = [
     ...record.files.filter((file) => !isSkillFilePath(file.path)).map((file) => file.path),
     ...record.backups.filter((entry) => !isSkillFilePath(entry.path)).map((entry) => entry.path),
@@ -8188,16 +8189,14 @@ function doctor(opts) {
       }
     }
   }
-  const recordPath = [cwd, home].map(recordPathOf).find((path) => existsSync2(path));
-  let record = null;
-  if (recordPath) {
+  const records = [...new Set([cwd, home].map((dir) => recordPathOf(dir)))].filter((path) => existsSync2(path)).map((path) => {
     try {
-      record = { path: recordPath, version: readRecord(recordPath).version };
+      return { path, version: readRecord(path).version };
     } catch (error) {
-      record = { path: recordPath, version: "", error: error instanceof Error ? error.message : String(error) };
+      return { path, version: "", error: error instanceof Error ? error.message : String(error) };
     }
-  }
-  return { locations, duplicates: [...duplicates].sort(), record };
+  });
+  return { locations, duplicates: [...duplicates].sort(), records };
 }
 
 // src/install/hosts.ts
@@ -8218,7 +8217,7 @@ function targetDirs(hosts, scope, env) {
 }
 
 // src/install/apply.ts
-import { copyFileSync, existsSync as existsSync4, mkdirSync, readdirSync as readdirSync3, readFileSync as readFileSync3, rmdirSync, unlinkSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync as existsSync4, linkSync, mkdirSync, readdirSync as readdirSync3, readFileSync as readFileSync3, renameSync, rmdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname as dirname2, join as join4, resolve as resolve3 } from "node:path";
 function changedSincePlan(target) {
   return new Error(`target changed since plan: ${target}; re-run install`);
@@ -8264,13 +8263,28 @@ function applyInstall(plan, opts) {
       const { source, target } = write;
       const bytes = readFileSync3(source);
       mkdirSync(dirname2(target), { recursive: true });
-      writeFileSync(target, bytes, { flag: "kind" in write && write.kind === "create" ? "wx" : "w" });
+      writeAtomic(target, bytes, "kind" in write && write.kind === "create");
       files2.set(relativeToRoot(root, target), sha256(bytes));
     }
   } finally {
     record = saveRecord(plan, previous, files2, backups, opts.now);
   }
   return record;
+}
+function writeAtomic(target, bytes, create) {
+  const temp = `${target}.ux-engineer-tmp-${process.pid}`;
+  rmSync(temp, { force: true });
+  writeFileSync(temp, bytes, { flag: "wx" });
+  try {
+    if (create) {
+      linkSync(temp, target);
+      unlinkSync(temp);
+    } else {
+      renameSync(temp, target);
+    }
+  } finally {
+    rmSync(temp, { force: true });
+  }
 }
 function saveRecord(plan, previous, files2, backups, now) {
   const next = {
@@ -8388,7 +8402,7 @@ function renderMarkdown(bundle) {
   const evidenceById = new Map(evidence.items.map((item) => [item.evidence_id, item]));
   const coverage = run.coverage.map((row2) => `| ${markdown(row2.task)} | ${markdown(row2.persona_id)} | ${markdown(row2.viewport)} | ${markdown(row2.state)} | ${markdown(row2.input_method)} | ${row2.tested ? "Tested" : "Not tested"} | ${markdown(row2.reason)} |`).join("\n");
   const findingRows = sortedFindings(findings.findings).map((finding) => `| ${markdown(finding.finding_id)} | ${markdown(finding.severity)} | ${markdown(finding.status)} | ${markdown(finding.title)} | ${markdown(finding.user_impact)} | ${evidenceText(finding.evidence_ids, evidenceById)} |`).join("\n");
-  const checkRows = checks.checks.map((check) => `| ${markdown(check.check_id)} | ${markdown(check.required ? "required" : "optional")} | ${markdown(check.result)} | ${evidenceText(check.evidence_ids, evidenceById)} |`).join("\n");
+  const checkRows = checks.checks.map((check) => `| ${markdown(check.check_id)} | ${markdown(check.required ? "required" : "not required")} | ${markdown(check.result)} | ${evidenceText(check.evidence_ids, evidenceById)} |`).join("\n");
   const nextSteps = findings.findings.filter((finding) => finding.status === "confirmed").map((finding) => `- ${markdown(finding.finding_id)}: ${markdown(finding.recommendation)}`).join("\n") || "- None";
   return `# UX run report: ${markdown(run.run_id)}
 
@@ -8450,7 +8464,7 @@ function renderHtml(bundle) {
   const evidenceById = new Map(evidence.items.map((item) => [item.evidence_id, item]));
   const coverage = run.coverage.map((row2) => `<tr><td>${html(row2.task)}</td><td>${html(row2.persona_id)}</td><td>${html(row2.viewport)}</td><td>${html(row2.state)}</td><td>${html(row2.input_method)}</td><td>${row2.tested ? "Tested" : "Not tested"}</td><td>${html(row2.reason)}</td></tr>`).join("");
   const findingRows = sortedFindings(findings.findings).map((finding) => `<tr><td>${html(finding.finding_id)}</td><td>${html(finding.severity)}</td><td>${html(finding.status)}</td><td>${html(finding.title)}</td><td>${html(finding.user_impact)}</td><td>${evidenceHtml(finding.evidence_ids, evidenceById)}</td></tr>`).join("");
-  const checkRows = checks.checks.map((check) => `<tr><td>${html(check.check_id)}</td><td>${html(check.required ? "required" : "optional")}</td><td>${html(check.result)}</td><td>${evidenceHtml(check.evidence_ids, evidenceById)}</td></tr>`).join("");
+  const checkRows = checks.checks.map((check) => `<tr><td>${html(check.check_id)}</td><td>${html(check.required ? "required" : "not required")}</td><td>${html(check.result)}</td><td>${evidenceHtml(check.evidence_ids, evidenceById)}</td></tr>`).join("");
   const list2 = (values) => values.length === 0 ? "<li>None</li>" : values.map((value) => `<li>${html(value)}</li>`).join("");
   const nextSteps = findings.findings.filter((finding) => finding.status === "confirmed").map((finding) => `<li><strong>${html(finding.finding_id)}</strong>: ${html(finding.recommendation)}</li>`).join("") || "<li>None</li>";
   return `<!doctype html>
@@ -9514,8 +9528,10 @@ function installerCommand(command, rest, io) {
         skills2.forEach(({ name, matchesPackage }) => output.push(`  ${name}  ${matchesPackage ? "matches package" : "differs from package"}`));
       }
       if (report.duplicates.length > 0) output.push(`Duplicates (a host reads these skills from more than one folder): ${report.duplicates.join(", ")}`);
-      const { record } = report;
-      output.push(!record ? "Install record: none" : record.error ? `Install record: invalid (${record.error})` : `Install record: ${record.path} (version ${record.version})`);
+      if (report.records.length === 0) output.push("Install record: none");
+      for (const record of report.records) {
+        output.push(record.error ? `Install record: invalid (${record.error})` : `Install record: ${record.path} (version ${record.version})`);
+      }
       return { status: 0, output, errors: [] };
     }
     if (command === "uninstall") {
@@ -9561,7 +9577,7 @@ function installerCommand(command, rest, io) {
     const count = (kind) => plan.actions.filter((action) => action.kind === kind).length;
     output.push(
       `${count("create")} created, ${count("update")} updated, ${count("skip-identical")} unchanged, ${plan.conflicts.length} overwritten (backups in .ux-engineer/backup/).`,
-      "Run /ux-engineer:ux-setup (Claude Code) or $ux-setup (Codex) in this project.",
+      "Run /ux-setup (Claude Code) or $ux-setup (Codex) in this project.",
       "Suggested AGENTS.md line (not written): Read docs/ux/ before any UI or UX work."
     );
     return { status: 0, output, errors: [] };
